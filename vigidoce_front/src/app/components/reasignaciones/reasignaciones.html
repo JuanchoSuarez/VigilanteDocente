@@ -1,0 +1,90 @@
+<div class="mb-4">
+  <h2 class="page-title mb-0">Reasignaciones</h2>
+  <p class="text-muted">Gestión de solicitudes de cambio de turno</p>
+</div>
+
+<div class="card-panel">
+  @if (loading) {
+    <div class="text-center py-4"><div class="spinner-border text-primary"></div></div>
+  } @else {
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>#</th>
+            <th>Turno</th>
+            <th>Docente original</th>
+            <th>Reemplazo</th>
+            <th>Motivo</th>
+            <th>Solicitud</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (r of reasignaciones; track r.id) {
+            <tr>
+              <td class="text-muted small">{{ r.id }}</td>
+              <td>
+                @if (r.turno) {
+                  <small>{{ r.turno.zona?.nombre }}<br>{{ r.turno.fecha }}</small>
+                }
+              </td>
+              <td>{{ r.docenteOriginal?.nombre }} {{ r.docenteOriginal?.apellido }}</td>
+              <td>{{ r.docenteReemplazo?.nombre ? r.docenteReemplazo?.nombre + ' ' + r.docenteReemplazo?.apellido : '—' }}</td>
+              <td class="small text-muted">{{ r.motivo }}</td>
+              <td class="small text-muted">{{ r.fechaHoraSolicitud | slice:0:16 }}</td>
+              <td><span [class]="estadoClass(r.estado)">{{ r.estado }}</span></td>
+              <td>
+                @if (r.estado === 'PENDIENTE') {
+                  <div class="d-flex gap-1">
+                    <button class="btn btn-sm btn-success" (click)="abrirAceptar(r)">
+                      <i class="bi bi-check-lg"></i>
+                    </button>
+                    <button class="btn btn-sm btn-danger" (click)="rechazar(r.id!)">
+                      <i class="bi bi-x-lg"></i>
+                    </button>
+                  </div>
+                }
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="8" class="text-center text-muted py-4">No hay reasignaciones</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
+
+@if (showAceptarModal) {
+  <div class="modal-backdrop-custom" (click)="showAceptarModal = false"></div>
+  <div class="modal d-block" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Aceptar Reasignación</h5>
+          <button type="button" class="btn-close" (click)="showAceptarModal = false"></button>
+        </div>
+        <div class="modal-body">
+          <p class="text-muted">Motivo: <strong>{{ reasignacionSeleccionada?.motivo }}</strong></p>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Docente de reemplazo *</label>
+            <select class="form-select" [(ngModel)]="docenteReemplazoId">
+              <option [value]="null">-- Selecciona docente --</option>
+              @for (d of docentes; track d.id) {
+                <option [value]="d.id">{{ d.nombre }} {{ d.apellido }}</option>
+              }
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" (click)="showAceptarModal = false">Cancelar</button>
+          <button class="btn btn-success" [disabled]="!docenteReemplazoId" (click)="confirmarAceptar()">
+            <i class="bi bi-check-circle me-1"></i>Aceptar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

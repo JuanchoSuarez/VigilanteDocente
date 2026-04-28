@@ -1,0 +1,108 @@
+<div class="app-container" [class.sidebar-closed]="!sidebarOpen">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <i class="bi bi-shield-check sidebar-logo-icon"></i>
+      <span class="sidebar-logo-text">VigilanteDocente</span>
+    </div>
+
+    <!-- Avatar y usuario -->
+    <div class="sidebar-user">
+      <div class="avatar-circle" [class]="rolClass">{{ iniciales }}</div>
+      <div class="user-info">
+        <div class="user-name">{{ usuario?.nombre }} {{ usuario?.apellido }}</div>
+        <span class="role-badge" [class]="rolClass">{{ rolLabel }}</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+
+      <!-- DOCENTE NAV -->
+      @if (isDocente) {
+        <a routerLink="/docente/dashboard" routerLinkActive="active" class="nav-item">
+          <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+        <a routerLink="/docente/turnos" routerLinkActive="active" class="nav-item">
+          <i class="bi bi-calendar-check"></i> Mis Turnos
+        </a>
+        <a routerLink="/docente/incidentes" routerLinkActive="active" class="nav-item">
+          <i class="bi bi-exclamation-triangle"></i> Mis Incidentes
+        </a>
+      }
+
+      <!-- COORDINADOR NAV -->
+      @if (isCoordinador) {
+        <a routerLink="/coordinador/dashboard" routerLinkActive="active" class="nav-item">
+          <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+        <a routerLink="/coordinador/tablero" routerLinkActive="active" class="nav-item">
+          <i class="bi bi-grid-3x3-gap"></i> Tablero en Vivo
+        </a>
+        <a routerLink="/coordinador/incidentes" routerLinkActive="active" class="nav-item">
+          <i class="bi bi-exclamation-triangle"></i> Incidentes
+        </a>
+        <a routerLink="/coordinador/reasignaciones" routerLinkActive="active" class="nav-item">
+          <i class="bi bi-arrow-left-right"></i> Reasignaciones
+        </a>
+      }
+
+      <!-- ADMIN NAV -->
+      @if (isAdmin) {
+        <a routerLink="/admin/dashboard" routerLinkActive="active" class="nav-item">
+          <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+        <div class="nav-section-label">Gestión</div>
+        <a routerLink="/admin/docentes" routerLinkActive="active" class="nav-item">
+          <i class="bi bi-people"></i> Docentes
+        </a>
+        <a routerLink="/admin/zonas" routerLinkActive="active" class="nav-item">
+          <i class="bi bi-map"></i> Zonas
+        </a>
+        <a routerLink="/admin/turnos" routerLinkActive="active" class="nav-item">
+          <i class="bi bi-calendar3"></i> Turnos
+        </a>
+        <div class="nav-section-label">Reportes</div>
+        <a routerLink="/admin/incidentes" routerLinkActive="active" class="nav-item">
+          <i class="bi bi-exclamation-triangle"></i> Incidentes
+        </a>
+        <a routerLink="/admin/registros" routerLinkActive="active" class="nav-item">
+          <i class="bi bi-clipboard-check"></i> Registros
+        </a>
+        <a routerLink="/admin/reasignaciones" routerLinkActive="active" class="nav-item">
+          <i class="bi bi-arrow-left-right"></i> Reasignaciones
+        </a>
+      }
+
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="btn-logout" (click)="logout()">
+        <i class="bi bi-box-arrow-left"></i> Cerrar sesión
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN AREA -->
+  <div class="main-area">
+    <!-- NAVBAR -->
+    <nav class="top-navbar">
+      <button class="btn-toggle-sidebar" (click)="toggleSidebar()">
+        <i class="bi bi-list"></i>
+      </button>
+      <div class="navbar-spacer"></div>
+      <div class="navbar-right">
+        <i class="bi bi-clock me-1"></i>
+        <span class="hora-actual">{{ horaActual }}</span>
+        <span class="nav-divider">|</span>
+        <i class="bi bi-person-circle me-1"></i>
+        <span class="nav-username">{{ usuario?.nombre }} {{ usuario?.apellido }}</span>
+      </div>
+    </nav>
+
+    <!-- CONTENT -->
+    <main class="main-content">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

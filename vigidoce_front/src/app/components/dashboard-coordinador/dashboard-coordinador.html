@@ -1,0 +1,165 @@
+<div class="page-header mb-4">
+  <h2 class="page-title">Tablero de Coordinación</h2>
+  <p class="text-muted">{{ hoy }}</p>
+</div>
+
+<!-- ALERTA si hay turnos con problema -->
+@if (turnosConProblema.length > 0) {
+  <div class="alert alert-danger d-flex align-items-center gap-2 mb-4">
+    <i class="bi bi-alarm-fill fs-5"></i>
+    <span><strong>¡Atención!</strong> Hay {{ turnosConProblema.length }} turno(s) sin cobertura o pendientes de confirmación.</span>
+  </div>
+}
+
+<!-- FILTROS -->
+<div class="filtros-bar mb-4">
+  <span class="fw-semibold text-muted me-2">Filtrar franja:</span>
+  <div class="btn-group">
+    <button class="btn btn-sm" [class.btn-primary]="filtroFranja === 'TODOS'" [class.btn-outline-primary]="filtroFranja !== 'TODOS'" (click)="filtroFranja = 'TODOS'">Todos</button>
+    <button class="btn btn-sm" [class.btn-primary]="filtroFranja === 'RECREO'" [class.btn-outline-primary]="filtroFranja !== 'RECREO'" (click)="filtroFranja = 'RECREO'"><i class="bi bi-sun me-1"></i>Recreo</button>
+    <button class="btn btn-sm" [class.btn-primary]="filtroFranja === 'ALMUERZO'" [class.btn-outline-primary]="filtroFranja !== 'ALMUERZO'" (click)="filtroFranja = 'ALMUERZO'"><i class="bi bi-cup-straw me-1"></i>Almuerzo</button>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- TABLERO DE ZONAS -->
+  <div class="col-lg-7">
+    <div class="card-panel">
+      <h5 class="panel-title"><i class="bi bi-grid-3x3-gap me-2"></i>Estado de Zonas</h5>
+      @if (loading) {
+        <div class="text-center py-4"><div class="spinner-border text-primary"></div></div>
+      } @else {
+        <div class="zonas-grid">
+          @for (zona of zonas; track zona.id) {
+            @if (zona.activa) {
+              <div class="zona-card" [class.zona-verde]="getStatusZona(zona) === 'verde'" [class.zona-amarillo]="getStatusZona(zona) === 'amarillo'" [class.zona-rojo]="getStatusZona(zona) === 'rojo'">
+                <div class="zona-semaforo">
+                  @if (getStatusZona(zona) === 'verde') {
+                    <i class="bi bi-check-circle-fill text-success fs-3"></i>
+                  } @else if (getStatusZona(zona) === 'amarillo') {
+                    <i class="bi bi-hourglass-split text-warning fs-3"></i>
+                  } @else {
+                    <i class="bi bi-x-circle-fill text-danger fs-3"></i>
+                  }
+                </div>
+                <div class="zona-info">
+                  <strong>{{ zona.nombre }}</strong>
+                  <small class="text-muted d-block">{{ zona.tipo }}</small>
+                  <small class="docente-asignado">{{ getDocenteZona(zona) }}</small>
+                </div>
+                @if (getStatusZona(zona) === 'rojo') {
+                  <button class="btn btn-sm btn-warning ms-auto" (click)="abrirReasignar(turnosFiltrados[0])">
+                    <i class="bi bi-person-fill-add"></i>
+                  </button>
+                }
+              </div>
+            }
+          }
+        </div>
+      }
+    </div>
+
+    <!-- TABLA TURNOS DEL DÍA -->
+    <div class="card-panel mt-4">
+      <h5 class="panel-title"><i class="bi bi-table me-2"></i>Turnos del día</h5>
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Zona</th>
+              <th>Docente</th>
+              <th>Horario</th>
+              <th>Estado</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (t of turnosFiltrados; track t.id) {
+              <tr>
+                <td>{{ t.zona?.nombre }}</td>
+                <td>{{ t.docente?.nombre }} {{ t.docente?.apellido }}</td>
+                <td>{{ t.horaInicio }} - {{ t.horaFin }}</td>
+                <td><span [class]="estadoClass(t.estado)">{{ t.estado }}</span></td>
+                <td>
+                  @if (t.estado === 'PENDIENTE' || t.estado === 'AUSENTE') {
+                    <button class="btn btn-sm btn-outline-warning" (click)="abrirReasignar(t)">
+                      <i class="bi bi-arrow-left-right me-1"></i>Reasignar
+                    </button>
+                  }
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="5" class="text-center text-muted py-3">No hay turnos para este filtro</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANEL LATERAL -->
+  <div class="col-lg-5">
+    <!-- REASIGNACIONES PENDIENTES -->
+    @if (reasignacionesPendientes.length > 0) {
+      <div class="card-panel mb-4">
+        <h5 class="panel-title"><i class="bi bi-arrow-left-right me-2 text-warning"></i>Reasignaciones pendientes</h5>
+        @for (r of reasignacionesPendientes; track r.id) {
+          <div class="alert alert-warning py-2 px-3 mb-2 d-flex align-items-center gap-2">
+            <i class="bi bi-person-exclamation"></i>
+            <div>
+              <strong>{{ r.docenteOriginal?.nombre }}</strong> · {{ r.turno?.zona?.nombre }}
+              <small class="d-block text-muted">{{ r.motivo }}</small>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- ÚLTIMOS INCIDENTES -->
+    <div class="card-panel">
+      <h5 class="panel-title"><i class="bi bi-exclamation-triangle me-2 text-danger"></i>Últimos incidentes</h5>
+      @for (inc of incidentes; track inc.id) {
+        <div class="incidente-item">
+          <div class="d-flex align-items-center justify-content-between mb-1">
+            <strong class="small">{{ inc.zona?.nombre }}</strong>
+            <span [class]="severidadClass(inc.severidad)">{{ inc.severidad }}</span>
+          </div>
+          <p class="text-muted small mb-0">{{ inc.descripcion }}</p>
+        </div>
+      } @empty {
+        <p class="text-muted text-center py-3">Sin incidentes recientes</p>
+      }
+    </div>
+  </div>
+</div>
+
+<!-- MODAL REASIGNAR -->
+@if (showReasignarModal) {
+  <div class="modal-backdrop-custom" (click)="showReasignarModal = false"></div>
+  <div class="modal d-block" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Reasignar Turno</h5>
+          <button type="button" class="btn-close" (click)="showReasignarModal = false"></button>
+        </div>
+        <div class="modal-body">
+          <p class="text-muted mb-3">Zona: <strong>{{ turnoAReasignar?.zona?.nombre }}</strong></p>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Docente de reemplazo</label>
+            <select class="form-select" [(ngModel)]="docenteReemplazoId">
+              <option [value]="null">-- Selecciona docente --</option>
+              @for (d of docentes; track d.id) {
+                <option [value]="d.id">{{ d.nombre }} {{ d.apellido }}</option>
+              }
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" (click)="showReasignarModal = false">Cancelar</button>
+          <button class="btn btn-primary" [disabled]="!docenteReemplazoId" (click)="confirmarReasignar()">Confirmar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

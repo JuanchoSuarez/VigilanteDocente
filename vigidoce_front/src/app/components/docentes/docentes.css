@@ -1,0 +1,25 @@
+.page-title { font-size: 1.5rem; font-weight: 700; color: #1a2035; }
+
+.card-panel {
+  background: white; border-radius: 16px; padding: 1.25rem;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+
+.avatar-sm {
+  width: 36px; height: 36px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 0.8rem; color: white; flex-shrink: 0;
+}
+.badge-docente { background: #2E7D32; }
+.badge-coordinador { background: #E65100; }
+.badge-admin { background: #6A1B9A; }
+
+.role-badge {
+  display: inline-block; color: white; font-size: 0.7rem; font-weight: 600;
+  padding: 2px 8px; border-radius: 20px;
+}
+
+.modal-backdrop-custom {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1040;
+}
+.modal { z-index: 1050; }

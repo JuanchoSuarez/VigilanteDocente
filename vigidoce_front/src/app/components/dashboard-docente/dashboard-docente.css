@@ -1,0 +1,108 @@
+.page-title { font-size: 1.6rem; font-weight: 700; color: #1a2035; }
+
+.turno-activo-card {
+  background: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  border-left: 5px solid #1565C0;
+}
+
+.turno-activo-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.25rem;
+}
+
+.turno-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #1565C0;
+}
+
+.turno-zona {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a2035;
+  margin: 0.25rem 0;
+}
+
+.turno-detalles { color: #6b7280; font-size: 0.9rem; margin: 0; }
+
+.semaforo-container { text-align: center; }
+.semaforo {
+  width: 56px; height: 56px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.75rem; margin-bottom: 0.25rem;
+}
+.semaforo.verde { background: #DCFCE7; color: #16a34a; }
+.semaforo.amarillo { background: #FEF9C3; color: #ca8a04; }
+.semaforo.gris { background: #F3F4F6; color: #9ca3af; }
+
+.turno-acciones { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+.btn-accion { display: flex; align-items: center; gap: 0.5rem; font-weight: 600; border-radius: 8px; }
+
+.stat-card {
+  background: white;
+  border-radius: 16px;
+  padding: 1.25rem;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.stat-icon {
+  width: 52px; height: 52px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem;
+}
+.stat-value { font-size: 1.75rem; font-weight: 700; color: #1a2035; line-height: 1; }
+.stat-label { color: #6b7280; font-size: 0.8rem; }
+
+.card-panel {
+  background: white;
+  border-radius: 16px;
+  padding: 1.25rem;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+.panel-title { font-weight: 700; color: #1a2035; margin-bottom: 1rem; }
+
+/* Modales */
+.modal-backdrop-custom {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 1040;
+}
+.modal { z-index: 1050; }
+
+.metodo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+.metodo-card {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 0.25rem; padding: 1.25rem 0.75rem;
+  border: 2px solid #e5e7eb; border-radius: 12px;
+  background: white; cursor: pointer; transition: all 0.2s;
+  font-size: 0.875rem;
+}
+.metodo-card:hover { border-color: #1565C0; background: #EFF6FF; }
+
+.pin-input { max-width: 180px; margin: 0 auto; letter-spacing: 12px; }
+
+.tipo-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+.tipo-card {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 0.25rem; padding: 1.25rem; border: 2px solid #e5e7eb;
+  border-radius: 12px; background: white; cursor: pointer; transition: all 0.2s;
+  font-size: 0.875rem;
+}
+.tipo-card:hover, .tipo-card.selected { background: #f8faff; }
+
+.severidad-list { display: flex; flex-direction: column; gap: 0.75rem; }
+.severidad-card {
+  display: flex; align-items: center; gap: 1rem; padding: 1rem 1.25rem;
+  border: 2px solid #e5e7eb; border-radius: 12px; background: white;
+  cursor: pointer; transition: all 0.2s; text-align: left;
+}
+.severidad-card:hover, .severidad-card.selected { background: #f8faff; }

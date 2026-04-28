@@ -1,0 +1,284 @@
+<div class="page-header mb-4">
+  <h2 class="page-title">{{ saludo }}, <span class="text-primary">{{ usuario?.nombre }}</span>!</h2>
+  <p class="text-muted mb-0">Panel de vigilancia docente</p>
+</div>
+
+@if (loading) {
+  <div class="text-center py-5">
+    <div class="spinner-border text-primary"></div>
+    <p class="mt-2 text-muted">Cargando tus turnos...</p>
+  </div>
+}
+
+<!-- TURNO ACTIVO -->
+@if (!loading) {
+  @if (turnoActivo) {
+    <div class="turno-activo-card mb-4">
+      <div class="turno-activo-header">
+        <div>
+          <span class="turno-label">TURNO ACTIVO</span>
+          <h3 class="turno-zona">{{ turnoActivo.zona.nombre }}</h3>
+          <p class="turno-detalles">
+            <i class="bi bi-clock me-1"></i> {{ turnoActivo.horaInicio }} - {{ turnoActivo.horaFin }}
+            &nbsp;·&nbsp;
+            <i class="bi bi-flag me-1"></i> {{ turnoActivo.tipoFranja }}
+          </p>
+        </div>
+        <div class="semaforo-container">
+          <div class="semaforo" [class.verde]="turnoActivo.estado === 'EN_CURSO'" [class.amarillo]="turnoActivo.estado === 'PENDIENTE'" [class.gris]="turnoActivo.estado === 'CERRADO'">
+            <i class="bi" [class.bi-check-circle-fill]="turnoActivo.estado === 'EN_CURSO'" [class.bi-hourglass-split]="turnoActivo.estado === 'PENDIENTE'" [class.bi-check2-all]="turnoActivo.estado === 'CERRADO'"></i>
+          </div>
+          <small>{{ turnoActivo.estado }}</small>
+        </div>
+      </div>
+
+      <div class="turno-acciones">
+        <button class="btn btn-primary btn-accion" (click)="abrirCheckin()">
+          <i class="bi bi-geo-alt-fill"></i> Registrar Check-in
+        </button>
+        <button class="btn btn-warning btn-accion" (click)="abrirIncidente()">
+          <i class="bi bi-exclamation-triangle-fill"></i> Reportar Incidente
+        </button>
+        <button class="btn btn-outline-danger btn-accion" (click)="abrirReasignacion()">
+          <i class="bi bi-arrow-left-right"></i> No puedo llegar
+        </button>
+      </div>
+    </div>
+  } @else {
+    <div class="alert alert-info d-flex align-items-center gap-2 mb-4">
+      <i class="bi bi-info-circle-fill fs-5"></i>
+      <span>No tienes ningún turno activo o pendiente hoy.</span>
+    </div>
+  }
+
+  <!-- STATS -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-4">
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#EFF6FF; color:#1565C0"><i class="bi bi-calendar-check"></i></div>
+        <div>
+          <div class="stat-value">{{ turnosHoy.length }}</div>
+          <div class="stat-label">Turnos hoy</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#FFF3E0; color:#E65100"><i class="bi bi-exclamation-triangle"></i></div>
+        <div>
+          <div class="stat-value">{{ incidentes.length }}</div>
+          <div class="stat-label">Incidentes reportados</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#F3E5F5; color:#6A1B9A"><i class="bi bi-star-fill"></i></div>
+        <div>
+          <div class="stat-value">{{ turnosProximos.length }}</div>
+          <div class="stat-label">Próximos turnos</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRÓXIMOS TURNOS -->
+  @if (turnosProximos.length > 0) {
+    <div class="card-panel">
+      <h5 class="panel-title"><i class="bi bi-calendar3 me-2"></i>Próximos turnos</h5>
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Zona</th>
+              <th>Horario</th>
+              <th>Franja</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (t of turnosProximos; track t.id) {
+              <tr>
+                <td><i class="bi bi-calendar2 me-1 text-muted"></i>{{ t.fecha }}</td>
+                <td>{{ t.zona?.nombre }}</td>
+                <td>{{ t.horaInicio }} - {{ t.horaFin }}</td>
+                <td><span class="badge bg-info text-dark">{{ t.tipoFranja }}</span></td>
+                <td><span [class]="estadoClass(t.estado)">{{ t.estado }}</span></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+}
+
+<!-- ═══ MODAL CHECK-IN ═══════════════════════════════════════════ -->
+@if (showCheckinModal) {
+  <div class="modal-backdrop-custom" (click)="showCheckinModal = false"></div>
+  <div class="modal d-block" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="bi bi-geo-alt-fill me-2"></i>Registrar Check-in</h5>
+          <button type="button" class="btn-close" (click)="showCheckinModal = false"></button>
+        </div>
+        <div class="modal-body">
+          @if (checkinPaso === 1) {
+            <p class="text-muted mb-3">Selecciona el método de registro:</p>
+            <div class="metodo-grid">
+              @for (m of metodos; track m.value) {
+                <button class="metodo-card" (click)="seleccionarMetodo(m.value)">
+                  <i class="bi {{m.icon}} fs-1 mb-2"></i>
+                  <strong>{{ m.label }}</strong>
+                  <small class="text-muted">{{ m.desc }}</small>
+                </button>
+              }
+            </div>
+          }
+          @if (checkinPaso === 2) {
+            @if (metodoSeleccionado === 'QR') {
+              <div class="qr-area text-center">
+                <div class="qr-placeholder mb-3">
+                  <i class="bi bi-qr-code" style="font-size:5rem; color:#1565C0"></i>
+                  <p class="mt-2 text-muted">Código QR de la zona simulado</p>
+                </div>
+              </div>
+            }
+            @if (metodoSeleccionado === 'PIN') {
+              <div class="text-center">
+                <p class="text-muted mb-3">Ingresa el PIN de 4 dígitos:</p>
+                <input type="text" maxlength="4" [(ngModel)]="pinInput" class="form-control pin-input text-center fw-bold fs-3 mb-3" placeholder="0000" />
+              </div>
+            }
+            @if (metodoSeleccionado === 'NFC') {
+              <div class="text-center">
+                <i class="bi bi-wifi" style="font-size:5rem; color:#1565C0"></i>
+                <p class="mt-2 text-muted">Acerca tu dispositivo al lector NFC de la zona...</p>
+              </div>
+            }
+          }
+        </div>
+        <div class="modal-footer">
+          @if (checkinPaso === 1) {
+            <button class="btn btn-secondary" (click)="showCheckinModal = false">Cancelar</button>
+          }
+          @if (checkinPaso === 2) {
+            <button class="btn btn-secondary" (click)="checkinPaso = 1">Volver</button>
+            <button class="btn btn-primary" (click)="confirmarCheckin()">
+              <i class="bi bi-check-circle me-1"></i>Confirmar Check-in
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ═══ MODAL INCIDENTE ══════════════════════════════════════════ -->
+@if (showIncidenteModal) {
+  <div class="modal-backdrop-custom" (click)="showIncidenteModal = false"></div>
+  <div class="modal d-block" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="bi bi-exclamation-triangle-fill me-2 text-warning"></i>Reportar Incidente</h5>
+          <button type="button" class="btn-close" (click)="showIncidenteModal = false"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Progress -->
+          <div class="progress mb-4" style="height:6px">
+            <div class="progress-bar bg-primary" [style.width]="(incidentePaso / 3 * 100) + '%'"></div>
+          </div>
+          <p class="text-muted small mb-3">Paso {{ incidentePaso }} de 3</p>
+
+          @if (incidentePaso === 1) {
+            <p class="fw-semibold mb-3">¿Qué tipo de incidente ocurrió?</p>
+            <div class="tipo-grid">
+              @for (t of tipos; track t.value) {
+                <button class="tipo-card" [class.selected]="tipoIncidente === t.value" (click)="seleccionarTipo(t.value)" [style.border-color]="tipoIncidente === t.value ? t.color : ''">
+                  <i class="bi {{t.icon}} mb-2" [style.color]="t.color" style="font-size:2rem"></i>
+                  <strong>{{ t.label }}</strong>
+                </button>
+              }
+            </div>
+          }
+
+          @if (incidentePaso === 2) {
+            <p class="fw-semibold mb-3">Nivel de severidad del incidente:</p>
+            <div class="severidad-list">
+              @for (s of severidades; track s.value) {
+                <button class="severidad-card" [class.selected]="severidadIncidente === s.value" (click)="seleccionarSeveridad(s.value)" [style.border-color]="severidadIncidente === s.value ? s.color : ''">
+                  <i class="bi-circle-fill me-2" [style.color]="s.color"></i>
+                  <div>
+                    <strong [style.color]="s.color">{{ s.label }}</strong>
+                    <p class="mb-0 text-muted small">{{ s.desc }}</p>
+                  </div>
+                </button>
+              }
+            </div>
+          }
+
+          @if (incidentePaso === 3) {
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Descripción del incidente *</label>
+              <textarea [(ngModel)]="descripcionIncidente" class="form-control" rows="4" placeholder="Describe detalladamente lo ocurrido..."></textarea>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Observación estudiante <span class="text-muted fw-normal">(opcional)</span></label>
+              <input [(ngModel)]="observacionEstudiante" type="text" class="form-control" placeholder="Ej: Curso 8B, estudiante específico..." />
+            </div>
+          }
+        </div>
+        <div class="modal-footer">
+          @if (incidentePaso > 1) {
+            <button class="btn btn-secondary" (click)="incidentePaso = incidentePaso - 1">Volver</button>
+          }
+          @if (incidentePaso < 3) {
+            <button class="btn btn-secondary" (click)="showIncidenteModal = false">Cancelar</button>
+            <button class="btn btn-primary" [disabled]="incidentePaso === 1 && !tipoIncidente || incidentePaso === 2 && !severidadIncidente" (click)="incidentePaso === 1 ? tipoIncidente && (incidentePaso = 2) : severidadIncidente && (incidentePaso = 3)">
+              Siguiente
+            </button>
+          }
+          @if (incidentePaso === 3) {
+            <button class="btn btn-danger" [disabled]="!descripcionIncidente.trim()" (click)="confirmarIncidente()">
+              <i class="bi bi-send me-1"></i>Enviar incidente
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ═══ MODAL REASIGNACIÓN ═══════════════════════════════════════ -->
+@if (showReasignacionModal) {
+  <div class="modal-backdrop-custom" (click)="showReasignacionModal = false"></div>
+  <div class="modal d-block" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="bi bi-arrow-left-right me-2"></i>Solicitar Reasignación</h5>
+          <button type="button" class="btn-close" (click)="showReasignacionModal = false"></button>
+        </div>
+        <div class="modal-body">
+          <div class="alert alert-warning d-flex gap-2 align-items-center">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <span>Tu turno quedará en estado <strong>PENDIENTE</strong> hasta que el coordinador asigne un reemplazo.</span>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Motivo de la reasignación *</label>
+            <textarea [(ngModel)]="motivoReasignacion" class="form-control" rows="3" placeholder="Ej: Incapacidad médica, reunión urgente..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" (click)="showReasignacionModal = false">Cancelar</button>
+          <button class="btn btn-danger" [disabled]="!motivoReasignacion.trim()" (click)="confirmarReasignacion()">
+            <i class="bi bi-send me-1"></i>Solicitar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

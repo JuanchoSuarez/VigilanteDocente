@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<nav th:fragment="navbar" class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(135deg, #1e3a5f, #2e86de);">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="/"><i class="bi bi-shield-check me-2"></i>Vigilancia Docente</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto" id="nav-links">
+                <li class="nav-item nav-rol nav-docente nav-coordinador nav-admin">
+                    <a class="nav-link" href="/turnos" data-ruta="/turnos">
+                        <i class="bi bi-calendar-check me-1"></i>Turnos
+                    </a>
+                </li>
+                <li class="nav-item nav-rol nav-docente nav-coordinador nav-admin">
+                    <a class="nav-link" href="/incidentes" data-ruta="/incidentes">
+                        <i class="bi bi-exclamation-triangle me-1"></i>Incidentes
+                    </a>
+                </li>
+                <li class="nav-item nav-rol nav-docente nav-coordinador nav-admin">
+                    <a class="nav-link" href="/reasignaciones" data-ruta="/reasignaciones">
+                        <i class="bi bi-arrow-left-right me-1"></i>Reasignaciones
+                    </a>
+                </li>
+                <li class="nav-item nav-rol nav-docente nav-coordinador nav-admin">
+                    <a class="nav-link" href="/registros" data-ruta="/registros">
+                        <i class="bi bi-clipboard-check me-1"></i>Registros
+                    </a>
+                </li>
+                <li class="nav-item nav-rol nav-coordinador nav-admin">
+                    <a class="nav-link" href="/zonas" data-ruta="/zonas">
+                        <i class="bi bi-geo-alt me-1"></i>Zonas
+                    </a>
+                </li>
+                <li class="nav-item nav-rol nav-admin">
+                    <a class="nav-link" href="/docentes" data-ruta="/docentes">
+                        <i class="bi bi-person-badge me-1"></i>Docentes
+                    </a>
+                </li>
+            </ul>
+            <!-- Badge de rol activo en navbar -->
+            <span id="navbar-badge" class="ms-3 badge rounded-pill" style="display:none; font-size:0.8rem;"></span>
+        </div>
+    </div>
+</nav>
+
+<script>
+    // Aplica el rol guardado al navbar en cualquier página
+    (function() {
+        const rol = sessionStorage.getItem('rolActivo');
+        if (!rol) return;
+
+        const colores = { docente: '#2e86de', coordinador: '#27ae60', admin: '#8e44ad' };
+        const nombres = { docente: '👤 Docente', coordinador: '🔭 Coordinador', admin: '⚙️ Admin' };
+        const permitidos = {
+            docente:     ['/turnos', '/incidentes', '/reasignaciones', '/registros'],
+            coordinador: ['/turnos', '/incidentes', '/reasignaciones', '/registros', '/zonas'],
+            admin:       ['/turnos', '/incidentes', '/reasignaciones', '/registros', '/zonas', '/docentes']
+        };
+
+        // Ocultar links no permitidos
+        document.querySelectorAll('.nav-rol').forEach(li => li.style.display = 'none');
+        permitidos[rol].forEach(ruta => {
+            const link = document.querySelector('.nav-rol a[href="' + ruta + '"]');
+            if (link) link.closest('li').style.display = 'block';
+        });
+
+        // Mostrar badge
+        const badge = document.getElementById('navbar-badge');
+        if (badge) {
+            badge.textContent = nombres[rol];
+            badge.style.background = colores[rol];
+            badge.style.display = 'inline-block';
+        }
+    })();
+</script>
+</body>
+</html>

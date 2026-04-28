@@ -1,0 +1,95 @@
+<div class="page-header mb-4">
+  <h2 class="page-title">Panel Administrador</h2>
+  <p class="text-muted">Gestión completa del sistema VigilanteDocente</p>
+</div>
+
+<!-- KPIs -->
+<div class="row g-3 mb-4">
+  <div class="col-sm-6 col-xl-3">
+    <div class="kpi-card" style="border-color:#1565C0">
+      <div class="kpi-icon" style="background:#EFF6FF; color:#1565C0"><i class="bi bi-people-fill"></i></div>
+      <div class="kpi-value">{{ totalDocentes }}</div>
+      <div class="kpi-label">Docentes activos</div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="kpi-card" style="border-color:#2E7D32">
+      <div class="kpi-icon" style="background:#F0FDF4; color:#2E7D32"><i class="bi bi-map-fill"></i></div>
+      <div class="kpi-value">{{ totalZonas }}</div>
+      <div class="kpi-label">Zonas activas</div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="kpi-card" style="border-color:#E65100">
+      <div class="kpi-icon" style="background:#FFF3E0; color:#E65100"><i class="bi bi-calendar-check-fill"></i></div>
+      <div class="kpi-value">{{ turnosHoy }}</div>
+      <div class="kpi-label">Turnos hoy</div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="kpi-card" style="border-color:#6A1B9A">
+      <div class="kpi-icon" style="background:#F3E5F5; color:#6A1B9A"><i class="bi bi-exclamation-triangle-fill"></i></div>
+      <div class="kpi-value">{{ incidentesMes }}</div>
+      <div class="kpi-label">Incidentes este mes</div>
+    </div>
+  </div>
+</div>
+
+<!-- ACCESOS RÁPIDOS -->
+<h5 class="fw-bold mb-3">Acceso rápido</h5>
+<div class="row g-3">
+  <div class="col-md-4">
+    <a routerLink="/admin/docentes" class="quick-link-card">
+      <i class="bi bi-people" style="color:#1565C0"></i>
+      <div>
+        <strong>Gestionar Docentes</strong>
+        <small class="text-muted d-block">Ver, crear, editar y eliminar docentes</small>
+      </div>
+    </a>
+  </div>
+  <div class="col-md-4">
+    <a routerLink="/admin/zonas" class="quick-link-card">
+      <i class="bi bi-map" style="color:#2E7D32"></i>
+      <div>
+        <strong>Gestionar Zonas</strong>
+        <small class="text-muted d-block">Administrar zonas del colegio</small>
+      </div>
+    </a>
+  </div>
+  <div class="col-md-4">
+    <a routerLink="/admin/turnos" class="quick-link-card">
+      <i class="bi bi-calendar3" style="color:#E65100"></i>
+      <div>
+        <strong>Gestionar Turnos</strong>
+        <small class="text-muted d-block">Programar y asignar turnos</small>
+      </div>
+    </a>
+  </div>
+  <div class="col-md-4">
+    <a routerLink="/admin/incidentes" class="quick-link-card">
+      <i class="bi bi-exclamation-triangle" style="color:#dc3545"></i>
+      <div>
+        <strong>Ver Incidentes</strong>
+        <small class="text-muted d-block">Revisar todos los incidentes</small>
+      </div>
+    </a>
+  </div>
+  <div class="col-md-4">
+    <a routerLink="/admin/registros" class="quick-link-card">
+      <i class="bi bi-clipboard-check" style="color:#6A1B9A"></i>
+      <div>
+        <strong>Registros de Check-in</strong>
+        <small class="text-muted d-block">Historial de vigilancia</small>
+      </div>
+    </a>
+  </div>
+  <div class="col-md-4">
+    <a routerLink="/admin/reasignaciones" class="quick-link-card">
+      <i class="bi bi-arrow-left-right" style="color:#0891b2"></i>
+      <div>
+        <strong>Reasignaciones</strong>
+        <small class="text-muted d-block">Gestionar solicitudes</small>
+      </div>
+    </a>
+  </div>
+</div>

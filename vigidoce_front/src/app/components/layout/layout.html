@@ -1,79 +1,81 @@
-<div class="app-container" [class.sidebar-closed]="!sidebarOpen">
+<div class="app-container" [class.sidebar-open]="sidebarOpen">
 
-  <!-- SIDEBAR -->
+  <!-- OVERLAY para cerrar sidebar -->
+  @if (sidebarOpen) {
+  <div class="sidebar-overlay" (click)="toggleSidebar()"></div>
+  }
+
+  <!-- DRAWER SIDEBAR -->
   <aside class="sidebar">
     <div class="sidebar-header">
-      <i class="bi bi-shield-check sidebar-logo-icon"></i>
-      <span class="sidebar-logo-text">VigilanteDocente</span>
+      <div class="sidebar-brand">
+        <i class="bi bi-shield-check"></i>
+        <span>VigiDoc</span>
+      </div>
+      <button class="btn-close-sidebar" (click)="toggleSidebar()">
+        <i class="bi bi-x-lg"></i>
+      </button>
     </div>
 
-    <!-- Avatar y usuario -->
     <div class="sidebar-user">
-      <div class="avatar-circle" [class]="rolClass">{{ iniciales }}</div>
-      <div class="user-info">
+      <div class="avatar-pill" [class]="rolClass">{{ iniciales }}</div>
+      <div>
         <div class="user-name">{{ usuario?.nombre }} {{ usuario?.apellido }}</div>
-        <span class="role-badge" [class]="rolClass">{{ rolLabel }}</span>
+        <div class="user-role">{{ rolLabel }}</div>
       </div>
     </div>
 
     <nav class="sidebar-nav">
-
-      <!-- DOCENTE NAV -->
       @if (isDocente) {
-        <a routerLink="/docente/dashboard" routerLinkActive="active" class="nav-item">
-          <i class="bi bi-speedometer2"></i> Dashboard
-        </a>
-        <a routerLink="/docente/turnos" routerLinkActive="active" class="nav-item">
-          <i class="bi bi-calendar-check"></i> Mis Turnos
-        </a>
-        <a routerLink="/docente/incidentes" routerLinkActive="active" class="nav-item">
-          <i class="bi bi-exclamation-triangle"></i> Mis Incidentes
-        </a>
+      <a routerLink="/docente/dashboard" routerLinkActive="active" class="nav-item" (click)="toggleSidebar()">
+        <i class="bi bi-speedometer2"></i><span>Dashboard</span>
+      </a>
+      <a routerLink="/docente/turnos" routerLinkActive="active" class="nav-item" (click)="toggleSidebar()">
+        <i class="bi bi-calendar-check"></i><span>Mis Turnos</span>
+      </a>
+      <a routerLink="/docente/incidentes" routerLinkActive="active" class="nav-item" (click)="toggleSidebar()">
+        <i class="bi bi-exclamation-triangle"></i><span>Mis Incidentes</span>
+      </a>
       }
-
-      <!-- COORDINADOR NAV -->
       @if (isCoordinador) {
-        <a routerLink="/coordinador/dashboard" routerLinkActive="active" class="nav-item">
-          <i class="bi bi-speedometer2"></i> Dashboard
-        </a>
-        <a routerLink="/coordinador/tablero" routerLinkActive="active" class="nav-item">
-          <i class="bi bi-grid-3x3-gap"></i> Tablero en Vivo
-        </a>
-        <a routerLink="/coordinador/incidentes" routerLinkActive="active" class="nav-item">
-          <i class="bi bi-exclamation-triangle"></i> Incidentes
-        </a>
-        <a routerLink="/coordinador/reasignaciones" routerLinkActive="active" class="nav-item">
-          <i class="bi bi-arrow-left-right"></i> Reasignaciones
-        </a>
+      <a routerLink="/coordinador/dashboard" routerLinkActive="active" class="nav-item" (click)="toggleSidebar()">
+        <i class="bi bi-speedometer2"></i><span>Dashboard</span>
+      </a>
+      <a routerLink="/coordinador/tablero" routerLinkActive="active" class="nav-item" (click)="toggleSidebar()">
+        <i class="bi bi-grid-3x3-gap"></i><span>Tablero en Vivo</span>
+      </a>
+      <a routerLink="/coordinador/incidentes" routerLinkActive="active" class="nav-item" (click)="toggleSidebar()">
+        <i class="bi bi-exclamation-triangle"></i><span>Incidentes</span>
+      </a>
+      <a routerLink="/coordinador/reasignaciones" routerLinkActive="active" class="nav-item" (click)="toggleSidebar()">
+        <i class="bi bi-arrow-left-right"></i><span>Reasignaciones</span>
+      </a>
       }
-
-      <!-- ADMIN NAV -->
       @if (isAdmin) {
-        <a routerLink="/admin/dashboard" routerLinkActive="active" class="nav-item">
-          <i class="bi bi-speedometer2"></i> Dashboard
-        </a>
-        <div class="nav-section-label">Gestión</div>
-        <a routerLink="/admin/docentes" routerLinkActive="active" class="nav-item">
-          <i class="bi bi-people"></i> Docentes
-        </a>
-        <a routerLink="/admin/zonas" routerLinkActive="active" class="nav-item">
-          <i class="bi bi-map"></i> Zonas
-        </a>
-        <a routerLink="/admin/turnos" routerLinkActive="active" class="nav-item">
-          <i class="bi bi-calendar3"></i> Turnos
-        </a>
-        <div class="nav-section-label">Reportes</div>
-        <a routerLink="/admin/incidentes" routerLinkActive="active" class="nav-item">
-          <i class="bi bi-exclamation-triangle"></i> Incidentes
-        </a>
-        <a routerLink="/admin/registros" routerLinkActive="active" class="nav-item">
-          <i class="bi bi-clipboard-check"></i> Registros
-        </a>
-        <a routerLink="/admin/reasignaciones" routerLinkActive="active" class="nav-item">
-          <i class="bi bi-arrow-left-right"></i> Reasignaciones
-        </a>
+      <a routerLink="/admin/dashboard" routerLinkActive="active" class="nav-item" (click)="toggleSidebar()">
+        <i class="bi bi-speedometer2"></i><span>Dashboard</span>
+      </a>
+      <div class="nav-label">Gestión</div>
+      <a routerLink="/admin/docentes" routerLinkActive="active" class="nav-item" (click)="toggleSidebar()">
+        <i class="bi bi-people"></i><span>Docentes</span>
+      </a>
+      <a routerLink="/admin/zonas" routerLinkActive="active" class="nav-item" (click)="toggleSidebar()">
+        <i class="bi bi-map"></i><span>Zonas</span>
+      </a>
+      <a routerLink="/admin/turnos" routerLinkActive="active" class="nav-item" (click)="toggleSidebar()">
+        <i class="bi bi-calendar3"></i><span>Turnos</span>
+      </a>
+      <div class="nav-label">Reportes</div>
+      <a routerLink="/admin/incidentes" routerLinkActive="active" class="nav-item" (click)="toggleSidebar()">
+        <i class="bi bi-exclamation-triangle"></i><span>Incidentes</span>
+      </a>
+      <a routerLink="/admin/registros" routerLinkActive="active" class="nav-item" (click)="toggleSidebar()">
+        <i class="bi bi-clipboard-check"></i><span>Registros</span>
+      </a>
+      <a routerLink="/admin/reasignaciones" routerLinkActive="active" class="nav-item" (click)="toggleSidebar()">
+        <i class="bi bi-arrow-left-right"></i><span>Reasignaciones</span>
+      </a>
       }
-
     </nav>
 
     <div class="sidebar-footer">
@@ -83,26 +85,81 @@
     </div>
   </aside>
 
-  <!-- MAIN AREA -->
+  <!-- MAIN -->
   <div class="main-area">
-    <!-- NAVBAR -->
-    <nav class="top-navbar">
-      <button class="btn-toggle-sidebar" (click)="toggleSidebar()">
+    <!-- TOP BAR -->
+    <header class="top-bar" [class]="'top-bar-' + (usuario?.rol?.toLowerCase() ?? '')">
+      <button class="btn-menu" (click)="toggleSidebar()">
         <i class="bi bi-list"></i>
       </button>
-      <div class="navbar-spacer"></div>
-      <div class="navbar-right">
-        <i class="bi bi-clock me-1"></i>
-        <span class="hora-actual">{{ horaActual }}</span>
-        <span class="nav-divider">|</span>
-        <i class="bi bi-person-circle me-1"></i>
-        <span class="nav-username">{{ usuario?.nombre }} {{ usuario?.apellido }}</span>
+      <div class="top-bar-brand">
+        <i class="bi bi-shield-check"></i>
+        <span>VigiDoc</span>
       </div>
-    </nav>
+      <div class="top-bar-right">
+        <div class="hora-pill">
+          <i class="bi bi-clock"></i>
+          {{ horaActual }}
+        </div>
+        <div class="avatar-sm" [class]="rolClass">{{ iniciales }}</div>
+      </div>
+    </header>
 
     <!-- CONTENT -->
     <main class="main-content">
       <router-outlet></router-outlet>
     </main>
+
+    <!-- BOTTOM NAV POR ROL -->
+    @if (isDocente) {
+    <nav class="bottom-nav bottom-nav-docente">
+      <a routerLink="/docente/dashboard" routerLinkActive="bnav-active" class="bnav-item">
+        <i class="bi bi-house-fill"></i><span>Inicio</span>
+      </a>
+      <a routerLink="/docente/turnos" routerLinkActive="bnav-active" class="bnav-item">
+        <i class="bi bi-calendar-check-fill"></i><span>Turnos</span>
+      </a>
+      <a routerLink="/docente/incidentes" routerLinkActive="bnav-active" class="bnav-item">
+        <i class="bi bi-exclamation-triangle-fill"></i><span>Incidentes</span>
+      </a>
+    </nav>
+    }
+
+    @if (isCoordinador) {
+    <nav class="bottom-nav bottom-nav-coord">
+      <a routerLink="/coordinador/dashboard" routerLinkActive="bnav-active" class="bnav-item">
+        <i class="bi bi-house-fill"></i><span>Inicio</span>
+      </a>
+      <a routerLink="/coordinador/tablero" routerLinkActive="bnav-active" class="bnav-item">
+        <i class="bi bi-grid-3x3-gap-fill"></i><span>Tablero</span>
+      </a>
+      <a routerLink="/coordinador/incidentes" routerLinkActive="bnav-active" class="bnav-item">
+        <i class="bi bi-exclamation-triangle-fill"></i><span>Incidentes</span>
+      </a>
+      <a routerLink="/coordinador/reasignaciones" routerLinkActive="bnav-active" class="bnav-item">
+        <i class="bi bi-arrow-left-right"></i><span>Cambios</span>
+      </a>
+    </nav>
+    }
+
+    @if (isAdmin) {
+    <nav class="bottom-nav bottom-nav-admin">
+      <a routerLink="/admin/dashboard" routerLinkActive="bnav-active" class="bnav-item">
+        <i class="bi bi-house-fill"></i><span>Inicio</span>
+      </a>
+      <a routerLink="/admin/docentes" routerLinkActive="bnav-active" class="bnav-item">
+        <i class="bi bi-people-fill"></i><span>Docentes</span>
+      </a>
+      <a routerLink="/admin/zonas" routerLinkActive="bnav-active" class="bnav-item">
+        <i class="bi bi-map-fill"></i><span>Zonas</span>
+      </a>
+      <a routerLink="/admin/incidentes" routerLinkActive="bnav-active" class="bnav-item">
+        <i class="bi bi-exclamation-triangle-fill"></i><span>Alertas</span>
+      </a>
+      <a routerLink="/admin/registros" routerLinkActive="bnav-active" class="bnav-item">
+        <i class="bi bi-clipboard-data-fill"></i><span>Datos</span>
+      </a>
+    </nav>
+    }
   </div>
 </div>

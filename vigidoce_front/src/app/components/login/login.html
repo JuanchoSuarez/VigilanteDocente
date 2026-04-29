@@ -1,113 +1,114 @@
-<div class="login-wrapper">
-  <!-- Panel izquierdo (branding) -->
-  <div class="login-left">
-    <div class="brand-box">
-      <div class="brand-icon">
-        <i class="bi bi-shield-check"></i>
-      </div>
-      <h1 class="brand-title">VigilanteDocente</h1>
-      <p class="brand-subtitle">Sistema de gestión de vigilancia docente en recreos y almuerzos</p>
-      <div class="brand-features">
-        <div class="feature-item">
-          <i class="bi bi-check-circle-fill"></i>
-          <span>Control de turnos en tiempo real</span>
-        </div>
-        <div class="feature-item">
-          <i class="bi bi-check-circle-fill"></i>
-          <span>Registro de incidentes por zona</span>
-        </div>
-        <div class="feature-item">
-          <i class="bi bi-check-circle-fill"></i>
-          <span>Gestión de reasignaciones</span>
-        </div>
-      </div>
-    </div>
+<div class="login-screen">
+
+  <!-- Fondo decorativo -->
+  <div class="login-bg">
+    <div class="bg-orb bg-orb-1"></div>
+    <div class="bg-orb bg-orb-2"></div>
+    <div class="bg-orb bg-orb-3"></div>
   </div>
 
-  <!-- Panel derecho (formulario) -->
-  <div class="login-right">
-    <div class="login-form-box">
-      <div class="text-center mb-4">
-        <i class="bi bi-shield-check text-primary" style="font-size:2.5rem"></i>
-        <h2 class="mt-2 fw-bold">Iniciar sesión</h2>
-        <p class="text-muted">Ingresa tus credenciales institucionales</p>
+  <!-- Notch space -->
+  <div class="login-notch-space"></div>
+
+  <!-- Header branding -->
+  <div class="login-header animate-slide-up">
+    <div class="login-logo-ring">
+      <i class="bi bi-shield-check"></i>
+    </div>
+    <h1 class="login-title">VigilanteDocente</h1>
+    <p class="login-subtitle">Sistema de vigilancia escolar</p>
+  </div>
+
+  <!-- Card form -->
+  <div class="login-card animate-slide-up" style="animation-delay:0.08s">
+
+    <div class="login-card-header">
+      <span class="login-card-label">Acceso institucional</span>
+    </div>
+
+    <!-- Error -->
+    @if (error) {
+      <div class="login-error animate-fade-in">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <span>{{ error }}</span>
+      </div>
+    }
+
+    <!-- Form -->
+    <form [formGroup]="form" (ngSubmit)="ingresar()" class="login-form">
+
+      <div class="field-group">
+        <label class="form-label" for="login-email">Correo institucional</label>
+        <div class="input-row">
+          <span class="input-group-text"><i class="bi bi-envelope-fill"></i></span>
+          <input
+            id="login-email"
+            type="email"
+            class="form-control"
+            formControlName="email"
+            placeholder="usuario@colegio.edu.co"
+            autocomplete="email"
+          />
+        </div>
+        @if (form.get('email')?.invalid && form.get('email')?.touched) {
+          <div class="field-error">Ingresa un email válido</div>
+        }
       </div>
 
-      @if (error) {
-        <div class="alert alert-danger d-flex align-items-center gap-2">
-          <i class="bi bi-exclamation-triangle-fill"></i>
-          {{ error }}
+      <div class="field-group">
+        <label class="form-label" for="login-password">Contraseña</label>
+        <div class="input-row">
+          <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+          <input
+            id="login-password"
+            type="password"
+            class="form-control"
+            formControlName="password"
+            placeholder="••••••••"
+            autocomplete="current-password"
+          />
         </div>
-      }
+        @if (form.get('password')?.invalid && form.get('password')?.touched) {
+          <div class="field-error">La contraseña es requerida</div>
+        }
+      </div>
 
-      <form [formGroup]="form" (ngSubmit)="ingresar()">
-        <div class="mb-3">
-          <label class="form-label fw-semibold">Correo institucional</label>
-          <div class="input-group">
-            <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-            <input
-              type="email"
-              class="form-control"
-              formControlName="email"
-              placeholder="usuario@colegio.edu.co"
-              autocomplete="email"
-            />
-          </div>
-          @if (form.get('email')?.invalid && form.get('email')?.touched) {
-            <div class="text-danger small mt-1">Ingresa un email válido</div>
-          }
-        </div>
+      <button
+        id="login-submit-btn"
+        type="submit"
+        class="btn-login"
+        [disabled]="loading"
+      >
+        @if (loading) {
+          <span class="spinner-border spinner-border-sm"></span>
+          <span>Verificando...</span>
+        } @else {
+          <i class="bi bi-box-arrow-in-right"></i>
+          <span>Ingresar al sistema</span>
+        }
+      </button>
+    </form>
 
-        <div class="mb-4">
-          <label class="form-label fw-semibold">Contraseña</label>
-          <div class="input-group">
-            <span class="input-group-text"><i class="bi bi-lock"></i></span>
-            <input
-              type="password"
-              class="form-control"
-              formControlName="password"
-              placeholder="••••••••"
-              autocomplete="current-password"
-            />
-          </div>
-          @if (form.get('password')?.invalid && form.get('password')?.touched) {
-            <div class="text-danger small mt-1">La contraseña es requerida</div>
-          }
-        </div>
-
-        <button
-          type="submit"
-          class="btn btn-primary w-100 btn-lg fw-semibold"
-          [disabled]="loading"
-        >
-          @if (loading) {
-            <span class="spinner-border spinner-border-sm me-2"></span>
-            Verificando...
-          } @else {
-            <i class="bi bi-box-arrow-in-right me-2"></i>
-            Ingresar
-          }
+    <!-- Demo credentials -->
+    <div class="demo-section">
+      <div class="demo-label">Credenciales de prueba — clic para autocompletar</div>
+      <div class="demo-list">
+        <button class="demo-item" (click)="form.patchValue({email:'carlos.garcia@colegio.edu.co', password:'1234'})">
+          <span class="demo-pill pill-docente">DOCENTE</span>
+          <span class="demo-email">carlos.garcia&#64;colegio.edu.co</span>
         </button>
-      </form>
-
-      <div class="login-hint mt-4">
-        <p class="small text-muted text-center mb-1"><strong>Credenciales de prueba:</strong></p>
-        <div class="credentials-list">
-          <div class="cred-item" (click)="form.patchValue({email:'carlos.garcia@colegio.edu.co', password:'1234'})">
-            <span class="badge bg-success me-2">DOCENTE</span>
-            <span class="text-muted small">carlos.garcia@colegio.edu.co</span>
-          </div>
-          <div class="cred-item" (click)="form.patchValue({email:'andres.martinez@colegio.edu.co', password:'1234'})">
-            <span class="badge me-2" style="background:#E65100">COORDINADOR</span>
-            <span class="text-muted small">andres.martinez@colegio.edu.co</span>
-          </div>
-          <div class="cred-item" (click)="form.patchValue({email:'juan.perez@colegio.edu.co', password:'1234'})">
-            <span class="badge me-2" style="background:#6A1B9A">ADMIN</span>
-            <span class="text-muted small">juan.perez@colegio.edu.co</span>
-          </div>
-          <div class="cred-item-hint text-muted small text-center mt-1">Contraseña para todos: <strong>1234</strong> · Clic para autocompletar</div>
-        </div>
+        <button class="demo-item" (click)="form.patchValue({email:'andres.martinez@colegio.edu.co', password:'1234'})">
+          <span class="demo-pill pill-coordinador">COORD</span>
+          <span class="demo-email">andres.martinez&#64;colegio.edu.co</span>
+        </button>
+        <button class="demo-item" (click)="form.patchValue({email:'juan.perez@colegio.edu.co', password:'1234'})">
+          <span class="demo-pill pill-admin">ADMIN</span>
+          <span class="demo-email">juan.perez&#64;colegio.edu.co</span>
+        </button>
       </div>
     </div>
   </div>
+
+  <!-- Padding bottom -->
+  <div style="height: 2rem; flex-shrink: 0;"></div>
 </div>

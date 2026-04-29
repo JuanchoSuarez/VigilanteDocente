@@ -8,7 +8,7 @@ import { Docente } from '../../models/docente.model';
 @Component({
   selector: 'app-reasignaciones',
   standalone: true,
-  imports: [FormsModule, SlicePipe],
+  imports: [FormsModule],
   templateUrl: './reasignaciones.html',
   styleUrl: './reasignaciones.css'
 })
@@ -20,7 +20,7 @@ export class ReasignacionesComponent implements OnInit {
   reasignacionSeleccionada: Reasignacion | null = null;
   docenteReemplazoId: number | null = null;
 
-  constructor(private api: ApiService) {}
+  constructor(private api: ApiService) { }
 
   ngOnInit(): void {
     this.cargar();

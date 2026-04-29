@@ -1,25 +1,597 @@
-.page-title { font-size: 1.5rem; font-weight: 700; color: #1a2035; }
-
-.card-panel {
-  background: white; border-radius: 16px; padding: 1.25rem;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+/* ── SHARED DARK TOKENS (inject into each component) ─── */
+:host {
+  display: block;
+  color: var(--text, rgba(255, 255, 255, 0.85));
 }
 
-.avatar-sm {
-  width: 36px; height: 36px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-weight: 700; font-size: 0.8rem; color: white; flex-shrink: 0;
-}
-.badge-docente { background: #2E7D32; }
-.badge-coordinador { background: #E65100; }
-.badge-admin { background: #6A1B9A; }
-
-.role-badge {
-  display: inline-block; color: white; font-size: 0.7rem; font-weight: 600;
-  padding: 2px 8px; border-radius: 20px;
+/* ── PAGE HEADER ─────────────────────────────── */
+.pg-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
 }
 
+.pg-title {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: white;
+  margin: 0;
+}
+
+.pg-sub {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.4);
+  margin: 2px 0 0;
+}
+
+/* ── ADD BUTTON ──────────────────────────────── */
+.btn-add {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.875rem;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+/* ── SEARCH BAR ──────────────────────────────── */
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 0.4rem 0.75rem;
+  margin-bottom: 0.875rem;
+}
+
+.search-bar i {
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 0.9rem;
+}
+
+.search-bar input {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  color: white;
+  font-size: 0.85rem;
+}
+
+.search-bar input::placeholder {
+  color: rgba(255, 255, 255, 0.25);
+}
+
+/* ── CARD LIST ───────────────────────────────── */
+.card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.item-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 0.75rem 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  transition: background 0.15s;
+}
+
+.item-card:hover {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.item-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.item-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.item-title {
+  font-weight: 700;
+  font-size: 0.875rem;
+  color: white;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.item-sub {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.4);
+  margin-top: 2px;
+}
+
+.item-actions {
+  display: flex;
+  gap: 0.3rem;
+  flex-shrink: 0;
+}
+
+.icon-btn {
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.icon-btn-edit {
+  background: rgba(129, 140, 248, 0.12);
+  color: #818CF8;
+}
+
+.icon-btn-edit:hover {
+  background: rgba(129, 140, 248, 0.25);
+}
+
+.icon-btn-del {
+  background: rgba(255, 80, 80, 0.1);
+  color: #FF6B6B;
+}
+
+.icon-btn-del:hover {
+  background: rgba(255, 80, 80, 0.22);
+}
+
+.icon-btn-ok {
+  background: rgba(0, 200, 100, 0.12);
+  color: #00C864;
+}
+
+.icon-btn-ok:hover {
+  background: rgba(0, 200, 100, 0.25);
+}
+
+/* ── BADGES ──────────────────────────────────── */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.62rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+
+.chip-green {
+  background: rgba(0, 200, 100, 0.15);
+  color: #00C864;
+}
+
+.chip-amber {
+  background: rgba(255, 193, 7, 0.15);
+  color: #FFC107;
+}
+
+.chip-red {
+  background: rgba(255, 80, 80, 0.15);
+  color: #FF6B6B;
+}
+
+.chip-blue {
+  background: rgba(96, 165, 250, 0.15);
+  color: #60A5FA;
+}
+
+.chip-violet {
+  background: rgba(129, 140, 248, 0.15);
+  color: #818CF8;
+}
+
+.chip-gray {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* ── FILTERS ROW ─────────────────────────────── */
+.filters-row {
+  display: flex;
+  gap: 0.35rem;
+  margin-bottom: 0.875rem;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.filter-pill {
+  padding: 0.3rem 0.7rem;
+  border-radius: 20px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+
+.filter-pill.active {
+  background: rgba(129, 140, 248, 0.2);
+  border-color: rgba(129, 140, 248, 0.4);
+  color: #818CF8;
+}
+
+/* ── EMPTY STATE ─────────────────────────────── */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 2.5rem;
+  color: rgba(255, 255, 255, 0.2);
+  text-align: center;
+}
+
+.empty-state i {
+  font-size: 2.5rem;
+}
+
+.empty-state p {
+  font-size: 0.8rem;
+  margin: 0;
+}
+
+/* ── LOADING ─────────────────────────────────── */
+.dark-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 2.5rem;
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 0.8rem;
+}
+
+.ring {
+  width: 36px;
+  height: 36px;
+  border: 3px solid rgba(255, 255, 255, 0.08);
+  border-top-color: rgba(129, 140, 248, 0.8);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ── MODAL SHEET ─────────────────────────────── */
 .modal-backdrop-custom {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1040;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 400;
+  backdrop-filter: blur(3px);
 }
-.modal { z-index: 1050; }
+
+.modal-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #0f0d1a;
+  border: 1px solid rgba(129, 140, 248, 0.15);
+  border-radius: 24px 24px 0 0;
+  padding: 1rem 1rem 2rem;
+  z-index: 500;
+  max-height: 88%;
+  overflow-y: auto;
+}
+
+.sheet-handle {
+  width: 36px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 2px;
+  margin: 0 auto 0.875rem;
+}
+
+.sheet-title {
+  font-size: 1rem;
+  font-weight: 800;
+  color: white;
+  margin-bottom: 1rem;
+}
+
+/* ── AUTO FIELD (read-only) ──────────────────── */
+.auto-block {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 12px;
+  padding: 0.625rem 0.875rem;
+  margin-bottom: 0.875rem;
+}
+
+.auto-block-label {
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: rgba(255, 255, 255, 0.3);
+  margin-bottom: 0.25rem;
+}
+
+.auto-block-value {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.auto-section-title {
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: rgba(255, 255, 255, 0.2);
+  margin: 0.25rem 0 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.auto-section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+/* ── FORM FIELDS ─────────────────────────────── */
+.f-group {
+  margin-bottom: 0.75rem;
+}
+
+.f-label {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: rgba(255, 255, 255, 0.45);
+  margin-bottom: 0.35rem;
+}
+
+.f-input,
+.f-select {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  color: white;
+  font-size: 0.85rem;
+  padding: 0.55rem 0.875rem;
+  outline: none;
+  transition: border-color 0.15s;
+  appearance: none;
+}
+
+.f-input:focus,
+.f-select:focus {
+  border-color: rgba(129, 140, 248, 0.5);
+}
+
+.f-input::placeholder {
+  color: rgba(255, 255, 255, 0.2);
+}
+
+.f-select option {
+  background: #1a1830;
+  color: white;
+}
+
+.f-select-wrap {
+  position: relative;
+}
+
+.f-select-wrap::after {
+  content: '▾';
+  position: absolute;
+  right: 0.875rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(255, 255, 255, 0.35);
+  pointer-events: none;
+  font-size: 0.8rem;
+}
+
+.f-textarea {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  color: white;
+  font-size: 0.85rem;
+  padding: 0.55rem 0.875rem;
+  outline: none;
+  resize: none;
+  transition: border-color 0.15s;
+}
+
+.f-textarea:focus {
+  border-color: rgba(129, 140, 248, 0.5);
+}
+
+.f-textarea::placeholder {
+  color: rgba(255, 255, 255, 0.2);
+}
+
+.f-checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+}
+
+.f-checkbox-row input[type="checkbox"] {
+  accent-color: #818CF8;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.f-checkbox-row label {
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.65);
+  cursor: pointer;
+}
+
+/* ── SHEET ACTIONS ───────────────────────────── */
+.sheet-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.btn-sheet-sec {
+  flex: 1;
+  padding: 0.7rem;
+  background: rgba(255, 255, 255, 0.07);
+  color: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-sheet-sec:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.btn-sheet-pri {
+  flex: 1;
+  padding: 0.7rem;
+  background: #818CF8;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btn-sheet-pri:hover:not(:disabled) {
+  background: #6d76f5;
+}
+
+.btn-sheet-pri:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.btn-sheet-ok {
+  flex: 1;
+  padding: 0.7rem;
+  background: rgba(0, 200, 100, 0.15);
+  color: #00C864;
+  border: 1px solid rgba(0, 200, 100, 0.25);
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-sheet-ok:hover:not(:disabled) {
+  background: rgba(0, 200, 100, 0.25);
+}
+
+.btn-sheet-ok:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* ── COMPONENT SPECIFICS ─────────────────── */
+.btn-add {
+  background: rgba(129, 140, 248, 0.15);
+  color: #818CF8;
+  border: 1px solid rgba(129, 140, 248, 0.25);
+}
+
+.btn-add:hover {
+  background: rgba(129, 140, 248, 0.25);
+}
+
+.avatar-pill {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: white;
+  flex-shrink: 0;
+}
+
+.badge-docente {
+  background: #00C896;
+}
+
+.badge-coordinador {
+  background: #FF8C42;
+}
+
+.badge-admin {
+  background: #818CF8;
+}
+
+.item-desc {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.35);
+  margin-top: 3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 200px;
+}
+
+.item-motivo {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.35);
+  margin-top: 3px;
+  font-style: italic;
+}
+
+.item-times {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.4);
+  margin-top: 3px;
+}
+
+.item-times i {
+  font-size: 0.65rem;
+  margin-right: 2px;
+}

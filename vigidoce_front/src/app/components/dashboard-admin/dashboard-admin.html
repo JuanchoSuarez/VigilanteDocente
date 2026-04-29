@@ -1,95 +1,138 @@
-<div class="page-header mb-4">
-  <h2 class="page-title">Panel Administrador</h2>
-  <p class="text-muted">Gestión completa del sistema VigilanteDocente</p>
-</div>
-
-<!-- KPIs -->
-<div class="row g-3 mb-4">
-  <div class="col-sm-6 col-xl-3">
-    <div class="kpi-card" style="border-color:#1565C0">
-      <div class="kpi-icon" style="background:#EFF6FF; color:#1565C0"><i class="bi bi-people-fill"></i></div>
-      <div class="kpi-value">{{ totalDocentes }}</div>
-      <div class="kpi-label">Docentes activos</div>
-    </div>
+<!-- HEADER ADMIN -->
+<div class="adm-header">
+  <div>
+    <p class="adm-saludo">Panel de</p>
+    <h2 class="adm-titulo">Administración</h2>
   </div>
-  <div class="col-sm-6 col-xl-3">
-    <div class="kpi-card" style="border-color:#2E7D32">
-      <div class="kpi-icon" style="background:#F0FDF4; color:#2E7D32"><i class="bi bi-map-fill"></i></div>
-      <div class="kpi-value">{{ totalZonas }}</div>
-      <div class="kpi-label">Zonas activas</div>
-    </div>
-  </div>
-  <div class="col-sm-6 col-xl-3">
-    <div class="kpi-card" style="border-color:#E65100">
-      <div class="kpi-icon" style="background:#FFF3E0; color:#E65100"><i class="bi bi-calendar-check-fill"></i></div>
-      <div class="kpi-value">{{ turnosHoy }}</div>
-      <div class="kpi-label">Turnos hoy</div>
-    </div>
-  </div>
-  <div class="col-sm-6 col-xl-3">
-    <div class="kpi-card" style="border-color:#6A1B9A">
-      <div class="kpi-icon" style="background:#F3E5F5; color:#6A1B9A"><i class="bi bi-exclamation-triangle-fill"></i></div>
-      <div class="kpi-value">{{ incidentesMes }}</div>
-      <div class="kpi-label">Incidentes este mes</div>
-    </div>
+  <div class="adm-avatar">
+    <i class="bi bi-shield-fill-check"></i>
   </div>
 </div>
 
-<!-- ACCESOS RÁPIDOS -->
-<h5 class="fw-bold mb-3">Acceso rápido</h5>
-<div class="row g-3">
-  <div class="col-md-4">
-    <a routerLink="/admin/docentes" class="quick-link-card">
-      <i class="bi bi-people" style="color:#1565C0"></i>
-      <div>
-        <strong>Gestionar Docentes</strong>
-        <small class="text-muted d-block">Ver, crear, editar y eliminar docentes</small>
-      </div>
-    </a>
+@if (loading) {
+<div class="adm-loading">
+  <div class="loading-ring"></div>
+  <p>Cargando datos...</p>
+</div>
+}
+
+@if (!loading) {
+<!-- STATS 2x2 -->
+<div class="adm-stats-grid">
+  <div class="adm-stat">
+    <div class="adm-stat-icon" style="background:rgba(129,140,248,0.15); color:#818CF8">
+      <i class="bi bi-people-fill"></i>
+    </div>
+    <div class="adm-stat-n">{{ totalDocentes }}</div>
+    <div class="adm-stat-l">Docentes activos</div>
   </div>
-  <div class="col-md-4">
-    <a routerLink="/admin/zonas" class="quick-link-card">
-      <i class="bi bi-map" style="color:#2E7D32"></i>
-      <div>
-        <strong>Gestionar Zonas</strong>
-        <small class="text-muted d-block">Administrar zonas del colegio</small>
-      </div>
-    </a>
+  <div class="adm-stat">
+    <div class="adm-stat-icon" style="background:rgba(34,211,238,0.15); color:#22D3EE">
+      <i class="bi bi-map-fill"></i>
+    </div>
+    <div class="adm-stat-n">{{ totalZonas }}</div>
+    <div class="adm-stat-l">Zonas activas</div>
   </div>
-  <div class="col-md-4">
-    <a routerLink="/admin/turnos" class="quick-link-card">
-      <i class="bi bi-calendar3" style="color:#E65100"></i>
-      <div>
-        <strong>Gestionar Turnos</strong>
-        <small class="text-muted d-block">Programar y asignar turnos</small>
-      </div>
-    </a>
+  <div class="adm-stat">
+    <div class="adm-stat-icon" style="background:rgba(251,191,36,0.15); color:#FBBF24">
+      <i class="bi bi-calendar-check-fill"></i>
+    </div>
+    <div class="adm-stat-n">{{ turnosHoy }}</div>
+    <div class="adm-stat-l">Turnos hoy</div>
   </div>
-  <div class="col-md-4">
-    <a routerLink="/admin/incidentes" class="quick-link-card">
-      <i class="bi bi-exclamation-triangle" style="color:#dc3545"></i>
-      <div>
-        <strong>Ver Incidentes</strong>
-        <small class="text-muted d-block">Revisar todos los incidentes</small>
-      </div>
-    </a>
-  </div>
-  <div class="col-md-4">
-    <a routerLink="/admin/registros" class="quick-link-card">
-      <i class="bi bi-clipboard-check" style="color:#6A1B9A"></i>
-      <div>
-        <strong>Registros de Check-in</strong>
-        <small class="text-muted d-block">Historial de vigilancia</small>
-      </div>
-    </a>
-  </div>
-  <div class="col-md-4">
-    <a routerLink="/admin/reasignaciones" class="quick-link-card">
-      <i class="bi bi-arrow-left-right" style="color:#0891b2"></i>
-      <div>
-        <strong>Reasignaciones</strong>
-        <small class="text-muted d-block">Gestionar solicitudes</small>
-      </div>
-    </a>
+  <div class="adm-stat">
+    <div class="adm-stat-icon" style="background:rgba(251,113,133,0.15); color:#FB7185">
+      <i class="bi bi-exclamation-triangle-fill"></i>
+    </div>
+    <div class="adm-stat-n">{{ incidentesMes }}</div>
+    <div class="adm-stat-l">Incidentes mes</div>
   </div>
 </div>
+
+<!-- EDITOR DE MAPA DE CALOR -->
+<div class="seccion-titulo">Editor de zonas — Mapa de calor</div>
+<div class="mapa-editor-card">
+  <div class="mapa-toolbar">
+    <span class="mapa-label">Dibuja zonas sobre el plano del colegio</span>
+    <div class="mapa-actions">
+      <button class="tool-btn" id="btnSelectImg" title="Cargar imagen de plano">
+        <i class="bi bi-image"></i>
+      </button>
+      <button class="tool-btn tool-btn-active" id="btnDraw" title="Dibujar zona">
+        <i class="bi bi-bounding-box"></i>
+      </button>
+      <button class="tool-btn" id="btnDelete" title="Eliminar seleccionada">
+        <i class="bi bi-trash3"></i>
+      </button>
+      <button class="tool-btn" id="btnClear" title="Limpiar todo">
+        <i class="bi bi-x-circle"></i>
+      </button>
+    </div>
+  </div>
+
+  <div class="canvas-wrap">
+    <canvas id="mapaCanvas"></canvas>
+    <div class="canvas-hint" id="canvasHint">
+      <i class="bi bi-image"></i>
+      <span>Carga un plano o dibuja directamente</span>
+    </div>
+    <input type="file" id="imgInput" accept="image/*" style="display:none" />
+  </div>
+
+  <!-- PANEL ZONA SELECCIONADA -->
+  <div class="zona-panel" id="zonaPanel" style="display:none">
+    <div class="zona-panel-row">
+      <div class="zona-panel-field">
+        <label>Nombre de la zona</label>
+        <input type="text" id="zonaNombre" placeholder="Ej: Cancha principal" />
+      </div>
+      <div class="zona-panel-field zona-panel-field-sm">
+        <label>Área (m²)</label>
+        <input type="number" id="zonaArea" placeholder="0" readonly />
+      </div>
+    </div>
+    <div class="zona-panel-row">
+      <div class="zona-panel-field">
+        <label>Nivel de incidentes</label>
+        <div class="heat-slider-wrap">
+          <input type="range" id="zonaHeat" min="0" max="100" value="0" />
+          <div class="heat-labels">
+            <span>Bajo</span><span>Medio</span><span>Alto</span>
+          </div>
+        </div>
+      </div>
+      <div class="zona-panel-field zona-panel-field-sm">
+        <label>Color actual</label>
+        <div class="heat-preview" id="heatPreview"></div>
+      </div>
+    </div>
+    <button class="btn-guardar-zona" id="btnGuardarZona">
+      <i class="bi bi-floppy me-1"></i>Guardar zona
+    </button>
+  </div>
+
+  <!-- LISTA DE ZONAS GUARDADAS -->
+  <div class="zonas-guardadas" id="zonasGuardadas"></div>
+</div>
+
+<!-- ACCESO RÁPIDO -->
+<div class="seccion-titulo" style="margin-top:1rem">Gestión rápida</div>
+<div class="acceso-grid">
+  <a routerLink="/admin/docentes" class="acceso-item">
+    <i class="bi bi-people-fill"></i>
+    <span>Docentes</span>
+  </a>
+  <a routerLink="/admin/zonas" class="acceso-item">
+    <i class="bi bi-map-fill"></i>
+    <span>Zonas</span>
+  </a>
+  <a routerLink="/admin/turnos" class="acceso-item">
+    <i class="bi bi-calendar3"></i>
+    <span>Turnos</span>
+  </a>
+  <a routerLink="/admin/incidentes" class="acceso-item">
+    <i class="bi bi-exclamation-triangle-fill"></i>
+    <span>Incidentes</span>
+  </a>
+</div>
+}

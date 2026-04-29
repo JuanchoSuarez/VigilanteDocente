@@ -1,36 +1,231 @@
-.page-title { font-size: 1.6rem; font-weight: 700; color: #1a2035; }
+/* ── COORDINADOR DASHBOARD ── ámbar/naranja ──────────── */
 
-.card-panel {
-  background: white; border-radius: 16px; padding: 1.25rem;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+.coord-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 0.875rem;
 }
-.panel-title { font-weight: 700; color: #1a2035; margin-bottom: 1rem; }
+.coord-label {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-muted);
+  margin-bottom: 2px;
+}
+.coord-title {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--color-text);
+  margin: 0;
+  line-height: 1.1;
+}
+.coord-date {
+  font-size: 0.75rem;
+  color: var(--color-muted);
+  margin: 2px 0 0;
+}
 
-.filtros-bar { display: flex; align-items: center; }
+.alerta-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(255,94,125,0.15);
+  border: 1px solid rgba(255,94,125,0.3);
+  color: #FF5E7D;
+  font-size: 0.8rem;
+  font-weight: 800;
+  padding: 0.35rem 0.7rem;
+  border-radius: 20px;
+  flex-shrink: 0;
+  animation: pulse-dot 1.2s ease-in-out infinite;
+}
 
-.zonas-grid { display: flex; flex-direction: column; gap: 0.75rem; }
+.alerta-urgente {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  background: rgba(255,94,125,0.08);
+  border: 1px solid rgba(255,94,125,0.2);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 1rem;
+  font-size: 0.8rem;
+  color: #FF9DB5;
+  margin-bottom: 0.875rem;
+}
+.alerta-urgente i { font-size: 1rem; color: #FF5E7D; flex-shrink: 0; }
 
+/* Filtros */
+.filtros-row {
+  display: flex;
+  gap: 0.375rem;
+  margin-bottom: 0.875rem;
+}
+.filtro-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.875rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.04);
+  color: rgba(255,255,255,0.45);
+  cursor: pointer;
+  font-family: var(--font);
+  transition: var(--transition);
+}
+.filtro-btn.active {
+  background: var(--color-primary-10);
+  border-color: var(--color-primary-30);
+  color: var(--color-primary);
+}
+.filtro-btn:hover:not(.active) {
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.7);
+}
+
+/* Panel */
+.panel {
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  margin-bottom: 0.875rem;
+}
+.panel-hdr {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--color-text);
+  border-bottom: 1px solid var(--color-border);
+}
+.panel-hdr i { color: var(--color-primary); }
+
+/* Zonas grid */
+.zonas-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
 .zona-card {
-  display: flex; align-items: center; gap: 1rem;
-  padding: 0.75rem 1rem; border-radius: 10px;
-  border-left: 4px solid transparent;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--color-border);
+  transition: var(--transition-fast);
 }
-.zona-verde { background: #F0FDF4; border-color: #16a34a; }
-.zona-amarillo { background: #FEFCE8; border-color: #ca8a04; }
-.zona-rojo { background: #FEF2F2; border-color: #dc2626; }
+.zona-card:last-child { border-bottom: none; }
+.zona-card:hover { background: rgba(255,255,255,0.03); }
 
-.zona-info strong { font-size: 0.9rem; color: #1a2035; }
-.docente-asignado { font-size: 0.8rem; color: #6b7280; }
-
-.incidente-item {
-  padding: 0.75rem 0;
-  border-bottom: 1px solid #f3f4f6;
+.zona-status-icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+  width: 28px;
+  text-align: center;
 }
-.incidente-item:last-child { border-bottom: none; }
+.zona-verde .zona-status-icon    { color: #00C896; }
+.zona-amarillo .zona-status-icon { color: #F59E0B; }
+.zona-rojo .zona-status-icon     { color: #FF5E7D; }
 
+.zona-info { flex: 1; min-width: 0; }
+.zona-nombre { font-size: 0.825rem; font-weight: 700; color: var(--color-text); }
+.zona-tipo   { font-size: 0.68rem; color: var(--color-muted); }
+.zona-docente { font-size: 0.72rem; color: rgba(255,255,255,0.45); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.zona-rojo { border-left: 2px solid #FF5E7D; }
+.zona-amarillo { border-left: 2px solid #F59E0B; }
+.zona-verde    { border-left: 2px solid #00C896; }
+
+.zona-reasignar-btn {
+  background: rgba(245,158,11,0.15);
+  border: 1px solid rgba(245,158,11,0.3);
+  color: #F59E0B;
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: var(--transition-fast);
+  flex-shrink: 0;
+}
+.zona-reasignar-btn:hover { background: rgba(245,158,11,0.25); }
+
+/* Reasignaciones */
+.reasig-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--color-border);
+}
+.reasig-item:last-child { border-bottom: none; }
+.reasig-avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: rgba(245,158,11,0.15);
+  border: 1px solid rgba(245,158,11,0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #F59E0B;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+.reasig-info { font-size: 0.8rem; color: var(--color-text); }
+.reasig-motivo { font-size: 0.72rem; color: var(--color-muted); margin-top: 2px; }
+
+/* Incidentes */
+.inc-item {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--color-border);
+}
+.inc-item:last-child { border-bottom: none; }
+.inc-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.25rem;
+}
+.inc-zona { font-size: 0.8125rem; color: var(--color-text); }
+.inc-desc { font-size: 0.75rem; color: var(--color-muted); margin: 0; }
+
+/* Severidad badges */
+.badge-alta   { font-size: 0.65rem; font-weight: 800; color: #FF5E7D; background: rgba(255,94,125,0.12); padding: 2px 8px; border-radius: 20px; }
+.badge-media  { font-size: 0.65rem; font-weight: 800; color: #F59E0B; background: rgba(245,158,11,0.12); padding: 2px 8px; border-radius: 20px; }
+.badge-baja   { font-size: 0.65rem; font-weight: 800; color: #00C896; background: rgba(0,200,150,0.12); padding: 2px 8px; border-radius: 20px; }
+
+/* Estado badges */
+.badge-estado-en-curso  { font-size: 0.65rem; color: #00C896; font-weight: 700; }
+.badge-estado-pendiente { font-size: 0.65rem; color: #F59E0B; font-weight: 700; }
+.badge-estado-ausente   { font-size: 0.65rem; color: #FF5E7D; font-weight: 700; }
+.badge-estado-cerrado   { font-size: 0.65rem; color: #888; font-weight: 700; }
+
+.empty-msg {
+  text-align: center;
+  color: rgba(255,255,255,0.2);
+  font-size: 0.8rem;
+  padding: 1.5rem;
+  margin: 0;
+}
+.loading-state {
+  display: flex; justify-content: center; padding: 1.5rem;
+}
+
+/* Modal backdrop */
 .modal-backdrop-custom {
   position: fixed; inset: 0;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(4px);
   z-index: 1040;
 }
 .modal { z-index: 1050; }

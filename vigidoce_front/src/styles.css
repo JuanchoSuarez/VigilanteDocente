@@ -11,10 +11,23 @@ body {
 }
 
 /* Scrollbar styling */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: #f1f5f9; }
-::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
 
 /* Bootstrap overrides */
 .btn {
@@ -27,23 +40,28 @@ body {
   background-color: #1565C0;
   border-color: #1565C0;
 }
+
 .btn-primary:hover {
   background-color: #0D47A1;
   border-color: #0D47A1;
 }
+
 .btn-primary:disabled {
   background-color: #90CAF9;
   border-color: #90CAF9;
 }
 
-.form-control, .form-select {
+.form-control,
+.form-select {
   border-radius: 8px;
   border-color: #e5e7eb;
   font-size: 0.9rem;
 }
-.form-control:focus, .form-select:focus {
+
+.form-control:focus,
+.form-select:focus {
   border-color: #1565C0;
-  box-shadow: 0 0 0 3px rgba(21,101,192,0.12);
+  box-shadow: 0 0 0 3px rgba(21, 101, 192, 0.12);
 }
 
 .input-group-text {
@@ -64,7 +82,7 @@ body {
 .modal-content {
   border-radius: 16px;
   border: none;
-  box-shadow: 0 8px 40px rgba(0,0,0,0.15);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.15);
 }
 
 .modal-header {
@@ -88,4 +106,42 @@ body {
 .spinner-border {
   width: 2rem;
   height: 2rem;
+}
+
+/* ═══ DARK THEME GLOBAL OVERRIDES ═══════════════════════════ */
+body {
+  background: #050509;
+}
+
+/* Fix selects y inputs dentro de modal-sheet */
+.f-select,
+.f-input,
+.f-textarea {
+  color-scheme: dark;
+}
+
+/* Scrollbar dark */
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* ── BOTTOM NAV FIJA siempre visible ─────────────────────── */
+.bottom-nav {
+  position: sticky;
+  bottom: 0;
+  z-index: 50;
+}
+
+/* Quitar padding-bottom del phone-screen para que el nav no quede cortado */
+.phone-screen {
+  overflow: hidden;
+}
+
+.main-content {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
 }

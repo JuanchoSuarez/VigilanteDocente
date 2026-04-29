@@ -1,132 +1,125 @@
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="pg-header">
   <div>
-    <h2 class="page-title mb-0">Incidentes</h2>
-    <p class="text-muted mb-0">{{ incidentes.length }} incidentes en el sistema</p>
+    <p class="pg-title">Incidentes</p>
+    <p class="pg-sub">{{ incidentes.length }} en el sistema</p>
   </div>
-  <button class="btn btn-primary d-flex align-items-center gap-2" (click)="abrirCrear()">
-    <i class="bi bi-plus-circle-fill"></i> Nuevo Incidente
+  <button class="btn-add" (click)="abrirCrear()">
+    <i class="bi bi-plus-circle-fill"></i> Nuevo
   </button>
 </div>
 
-<!-- Filtros -->
-<div class="d-flex gap-2 mb-3 flex-wrap">
-  <span class="fw-semibold text-muted align-self-center me-1">Filtrar:</span>
-  <button class="btn btn-sm" [class.btn-primary]="filtroSeveridad === ''" [class.btn-outline-secondary]="filtroSeveridad !== ''" (click)="filtroSeveridad = ''">Todos</button>
-  <button class="btn btn-sm" [class.btn-success]="filtroSeveridad === 'S1_LEVE'" [class.btn-outline-success]="filtroSeveridad !== 'S1_LEVE'" (click)="filtroSeveridad = 'S1_LEVE'">S1 Leve</button>
-  <button class="btn btn-sm" [class.btn-warning]="filtroSeveridad === 'S2_SEGUIMIENTO'" [class.btn-outline-warning]="filtroSeveridad !== 'S2_SEGUIMIENTO'" (click)="filtroSeveridad = 'S2_SEGUIMIENTO'">S2 Seguimiento</button>
-  <button class="btn btn-sm" [class.btn-danger]="filtroSeveridad === 'S3_ATENCION_INMEDIATA'" [class.btn-outline-danger]="filtroSeveridad !== 'S3_ATENCION_INMEDIATA'" (click)="filtroSeveridad = 'S3_ATENCION_INMEDIATA'">S3 Atención Inmediata</button>
+<div class="filters-row">
+  <button class="filter-pill" [class.active]="filtroSeveridad === ''" (click)="filtroSeveridad = ''">Todos</button>
+  <button class="filter-pill" [class.active]="filtroSeveridad === 'S1_LEVE'" (click)="filtroSeveridad = 'S1_LEVE'">🟢
+    Leve</button>
+  <button class="filter-pill" [class.active]="filtroSeveridad === 'S2_SEGUIMIENTO'"
+    (click)="filtroSeveridad = 'S2_SEGUIMIENTO'">🟡 Seguimiento</button>
+  <button class="filter-pill" [class.active]="filtroSeveridad === 'S3_ATENCION_INMEDIATA'"
+    (click)="filtroSeveridad = 'S3_ATENCION_INMEDIATA'">🔴 Inmediato</button>
 </div>
 
-<div class="card-panel">
-  @if (loading) {
-    <div class="text-center py-4"><div class="spinner-border text-primary"></div></div>
-  } @else {
-    <div class="table-responsive">
-      <table class="table table-hover mb-0">
-        <thead class="table-light">
-          <tr>
-            <th>#</th>
-            <th>Zona</th>
-            <th>Tipo</th>
-            <th>Severidad</th>
-            <th>Descripción</th>
-            <th>Fecha/Hora</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (i of incidentesFiltrados; track i.id) {
-            <tr>
-              <td class="text-muted small">{{ i.id }}</td>
-              <td>{{ i.zona?.nombre }}</td>
-              <td><span class="badge bg-info text-dark">{{ i.tipo }}</span></td>
-              <td><span [class]="severidadClass(i.severidad)">{{ i.severidad }}</span></td>
-              <td class="desc-cell">{{ i.descripcion }}</td>
-              <td class="text-muted small">{{ i.fechaHora | slice:0:16 }}</td>
-              <td>
-                <div class="btn-group">
-                  <button class="btn btn-sm btn-outline-primary" (click)="abrirEditar(i)"><i class="bi bi-pencil"></i></button>
-                  <button class="btn btn-sm btn-outline-danger" (click)="eliminar(i.id!)"><i class="bi bi-trash"></i></button>
-                </div>
-              </td>
-            </tr>
-          } @empty {
-            <tr><td colspan="7" class="text-center text-muted py-4">No hay incidentes</td></tr>
-          }
-        </tbody>
-      </table>
+@if (loading) {
+<div class="dark-loading">
+  <div class="ring"></div><span>Cargando...</span>
+</div>
+} @else {
+<div class="card-list">
+  @for (i of incidentesFiltrados; track i.id) {
+  <div class="item-card">
+    <div class="item-icon"
+      [style.background]="i.severidad==='S3_ATENCION_INMEDIATA' ? 'rgba(255,80,80,0.15)' : i.severidad==='S2_SEGUIMIENTO' ? 'rgba(255,193,7,0.12)' : 'rgba(0,200,100,0.12)'">
+      <i class="bi bi-exclamation-triangle-fill"
+        [style.color]="i.severidad==='S3_ATENCION_INMEDIATA' ? '#FF6B6B' : i.severidad==='S2_SEGUIMIENTO' ? '#FFC107' : '#00C864'"></i>
     </div>
-  }
-</div>
-
-@if (showModal) {
-  <div class="modal-backdrop-custom" (click)="showModal = false"></div>
-  <div class="modal d-block" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">{{ editId ? 'Editar' : 'Nuevo' }} Incidente</h5>
-          <button type="button" class="btn-close" (click)="showModal = false"></button>
-        </div>
-        <form [formGroup]="form" (ngSubmit)="guardar()">
-          <div class="modal-body">
-            <div class="row g-3">
-              <div class="col-md-6">
-                <label class="form-label">Turno *</label>
-                <select class="form-select" formControlName="turno">
-                  <option [value]="null">-- Selecciona --</option>
-                  @for (t of turnos; track t.id) {
-                    <option [value]="t.id">#{{ t.id }} - {{ t.docente?.nombre }} / {{ t.zona?.nombre }}</option>
-                  }
-                </select>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Zona *</label>
-                <select class="form-select" formControlName="zona">
-                  <option [value]="null">-- Selecciona --</option>
-                  @for (z of zonas; track z.id) {
-                    <option [value]="z.id">{{ z.nombre }}</option>
-                  }
-                </select>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Tipo *</label>
-                <select class="form-select" formControlName="tipo">
-                  @for (t of tipos; track t) {
-                    <option [value]="t">{{ t }}</option>
-                  }
-                </select>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Severidad *</label>
-                <select class="form-select" formControlName="severidad">
-                  @for (s of severidades; track s) {
-                    <option [value]="s">{{ s }}</option>
-                  }
-                </select>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Fecha y hora *</label>
-                <input type="datetime-local" class="form-control" formControlName="fechaHora" />
-              </div>
-              <div class="col-12">
-                <label class="form-label">Descripción *</label>
-                <textarea class="form-control" formControlName="descripcion" rows="3"></textarea>
-              </div>
-              <div class="col-12">
-                <label class="form-label">Observación estudiante (opcional)</label>
-                <input type="text" class="form-control" formControlName="observacionEstudiante" />
-              </div>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" (click)="showModal = false">Cancelar</button>
-            <button type="submit" class="btn btn-primary" [disabled]="form.invalid">
-              <i class="bi bi-floppy me-1"></i>Guardar
-            </button>
-          </div>
-        </form>
+    <div class="item-body">
+      <div class="item-title">{{ i.zona?.nombre }} — {{ i.tipo }}</div>
+      <div class="item-sub">
+        <span class="chip" [class.chip-red]="i.severidad==='S3_ATENCION_INMEDIATA'"
+          [class.chip-amber]="i.severidad==='S2_SEGUIMIENTO'" [class.chip-green]="i.severidad==='S1_LEVE'">{{
+          i.severidad }}</span>
+        &nbsp;· {{ i.fechaHora | slice:0:16 }}
       </div>
+      <div class="item-desc">{{ i.descripcion }}</div>
+    </div>
+    <div class="item-actions">
+      <button class="icon-btn icon-btn-edit" (click)="abrirEditar(i)"><i class="bi bi-pencil"></i></button>
+      <button class="icon-btn icon-btn-del" (click)="eliminar(i.id!)"><i class="bi bi-trash3"></i></button>
     </div>
   </div>
+  } @empty {
+  <div class="empty-state"><i class="bi bi-shield-check"></i>
+    <p>Sin incidentes en este filtro</p>
+  </div>
+  }
+</div>
+}
+
+@if (showModal) {
+<div class="modal-backdrop-custom" (click)="showModal = false"></div>
+<div class="modal-sheet">
+  <div class="sheet-handle"></div>
+  <p class="sheet-title"><i class="bi bi-exclamation-triangle-fill me-2"></i>{{ editId ? 'Editar' : 'Nuevo' }} Incidente
+  </p>
+  <form [formGroup]="form" (ngSubmit)="guardar()">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem">
+      <div class="f-group">
+        <label class="f-label">Turno *</label>
+        <div class="f-select-wrap">
+          <select class="f-select" formControlName="turno">
+            <option [value]="null">-- Selecciona --</option>
+            @for (t of turnos; track t.id) {
+            <option [value]="t.id">#{{ t.id }} {{ t.docente?.nombre }} / {{ t.zona?.nombre }}</option>
+            }
+          </select>
+        </div>
+      </div>
+      <div class="f-group">
+        <label class="f-label">Zona *</label>
+        <div class="f-select-wrap">
+          <select class="f-select" formControlName="zona">
+            <option [value]="null">-- Selecciona --</option>
+            @for (z of zonas; track z.id) { <option [value]="z.id">{{ z.nombre }}</option> }
+          </select>
+        </div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem">
+      <div class="f-group">
+        <label class="f-label">Tipo *</label>
+        <div class="f-select-wrap">
+          <select class="f-select" formControlName="tipo">
+            @for (t of tipos; track t) { <option [value]="t">{{ t }}</option> }
+          </select>
+        </div>
+      </div>
+      <div class="f-group">
+        <label class="f-label">Severidad *</label>
+        <div class="f-select-wrap">
+          <select class="f-select" formControlName="severidad">
+            @for (s of severidades; track s) { <option [value]="s">{{ s }}</option> }
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="f-group">
+      <label class="f-label">Fecha y hora *</label>
+      <input type="datetime-local" class="f-input" formControlName="fechaHora" />
+    </div>
+    <div class="f-group">
+      <label class="f-label">Descripción *</label>
+      <textarea class="f-textarea" formControlName="descripcion" rows="3"
+        placeholder="Describe lo ocurrido..."></textarea>
+    </div>
+    <div class="f-group">
+      <label class="f-label">Observación estudiante (opcional)</label>
+      <input type="text" class="f-input" formControlName="observacionEstudiante" placeholder="Curso, nombre..." />
+    </div>
+    <div class="sheet-actions">
+      <button type="button" class="btn-sheet-sec" (click)="showModal = false">Cancelar</button>
+      <button type="submit" class="btn-sheet-pri" [disabled]="form.invalid">
+        <i class="bi bi-floppy me-1"></i>Guardar
+      </button>
+    </div>
+  </form>
+</div>
 }

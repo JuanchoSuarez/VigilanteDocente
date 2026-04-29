@@ -1,57 +1,52 @@
-<div class="mb-4">
-  <h2 class="page-title mb-0">Registros de Vigilancia</h2>
-  <p class="text-muted">Historial de check-ins realizados por docentes</p>
+<div class="pg-header">
+  <div>
+    <p class="pg-title">Registros</p>
+    <p class="pg-sub">Check-ins de vigilancia</p>
+  </div>
 </div>
 
-<div class="card-panel">
-  @if (loading) {
-    <div class="text-center py-4"><div class="spinner-border text-primary"></div></div>
-  } @else {
-    <div class="table-responsive">
-      <table class="table table-hover mb-0">
-        <thead class="table-light">
-          <tr>
-            <th>#</th>
-            <th>Docente</th>
-            <th>Zona</th>
-            <th>Check-in</th>
-            <th>Check-out</th>
-            <th>Método</th>
-            <th>Recorrido</th>
-            <th>Limpieza</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (r of registros; track r.id) {
-            <tr>
-              <td class="text-muted small">{{ r.id }}</td>
-              <td>{{ r.docente?.nombre }} {{ r.docente?.apellido }}</td>
-              <td>{{ r.zona?.nombre }}</td>
-              <td class="small">{{ r.fechaHoraCheckIn | slice:0:16 }}</td>
-              <td class="small">{{ (r.fechaHoraCheckOut | slice:0:16) || '—' }}</td>
-              <td><span [class]="metodoClass(r.metodoRegistro)">{{ r.metodoRegistro }}</span></td>
-              <td>
-                @if (r.recorridoRealizado) {
-                  <i class="bi bi-check-circle-fill text-success"></i>
-                } @else {
-                  <i class="bi bi-x-circle text-muted"></i>
-                }
-              </td>
-              <td>
-                @if (r.calificacionLimpieza) {
-                  @for (i of [1,2,3,4]; track i) {
-                    <i class="bi" [class.bi-star-fill]="i <= r.calificacionLimpieza!" [class.bi-star]="i > r.calificacionLimpieza!" [class.text-warning]="i <= r.calificacionLimpieza!"></i>
-                  }
-                } @else {
-                  <span class="text-muted">—</span>
-                }
-              </td>
-            </tr>
-          } @empty {
-            <tr><td colspan="8" class="text-center text-muted py-4">No hay registros aún</td></tr>
-          }
-        </tbody>
-      </table>
+@if (loading) {
+<div class="dark-loading">
+  <div class="ring"></div><span>Cargando...</span>
+</div>
+} @else {
+<div class="card-list">
+  @for (r of registros; track r.id) {
+  <div class="item-card">
+    <div class="item-icon"
+      [style.background]="r.recorridoRealizado ? 'rgba(0,200,100,0.12)' : 'rgba(255,255,255,0.05)'">
+      <i class="bi" [class.bi-check-circle-fill]="r.recorridoRealizado" [class.bi-geo-alt]="!r.recorridoRealizado"
+        [style.color]="r.recorridoRealizado ? '#00C864' : 'rgba(255,255,255,0.3)'"></i>
     </div>
+    <div class="item-body">
+      <div class="item-title">{{ r.docente?.nombre }} {{ r.docente?.apellido }}</div>
+      <div class="item-sub">
+        <span class="chip chip-blue">{{ r.zona?.nombre }}</span>
+        &nbsp;· <span class="chip" [class.chip-violet]="r.metodoRegistro==='QR'"
+          [class.chip-blue]="r.metodoRegistro==='NFC'" [class.chip-gray]="r.metodoRegistro==='PIN'">{{ r.metodoRegistro
+          }}</span>
+      </div>
+      <div class="item-times">
+        <span><i class="bi bi-box-arrow-in-right"></i> {{ r.fechaHoraCheckIn | slice:11:16 }}</span>
+        @if (r.fechaHoraCheckOut) {
+        <span><i class="bi bi-box-arrow-right"></i> {{ r.fechaHoraCheckOut | slice:11:16 }}</span>
+        }
+        @if (r.calificacionLimpieza) {
+        <span>
+          @for (star of [1,2,3,4]; track star) {
+          <i class="bi" [class.bi-star-fill]="star <= r.calificacionLimpieza!"
+            [class.bi-star]="star > r.calificacionLimpieza!"
+            [style.color]="star <= r.calificacionLimpieza! ? '#FFC107' : 'rgba(255,255,255,0.2)'"></i>
+          }
+        </span>
+        }
+      </div>
+    </div>
+  </div>
+  } @empty {
+  <div class="empty-state"><i class="bi bi-clipboard-check"></i>
+    <p>No hay registros aún</p>
+  </div>
   }
 </div>
+}

@@ -13,7 +13,7 @@ import { Docente } from '../../models/docente.model';
 export class LayoutComponent implements OnInit, OnDestroy {
   usuario: Docente | null = null;
   horaActual = '';
-  sidebarOpen = true;
+  sidebarOpen = false;
   private intervalo: ReturnType<typeof setInterval> | null = null;
 
   constructor(private auth: AuthService, private router: Router) {}
@@ -22,6 +22,16 @@ export class LayoutComponent implements OnInit, OnDestroy {
     this.usuario = this.auth.getUsuarioActual();
     this.actualizarHora();
     this.intervalo = setInterval(() => this.actualizarHora(), 1000);
+    this.aplicarRolAlBody();
+  }
+
+  private aplicarRolAlBody(): void {
+    const body = document.body;
+    body.classList.remove('rol-docente', 'rol-coordinador', 'rol-admin');
+    const rol = this.usuario?.rol;
+    if (rol === 'DOCENTE') body.classList.add('rol-docente');
+    else if (rol === 'COORDINADOR') body.classList.add('rol-coordinador');
+    else if (rol === 'ADMINISTRADOR') body.classList.add('rol-admin');
   }
 
   ngOnDestroy(): void {

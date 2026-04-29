@@ -22,6 +22,7 @@ export class TurnosComponent implements OnInit {
   form: FormGroup;
   estados = Object.values(EstadoTurno);
   franjas = Object.values(TipoFranja);
+  fechaHoy = new Date().toISOString().split('T')[0];
 
   constructor(private api: ApiService, private fb: FormBuilder) {
     this.form = this.fb.group({

@@ -1,112 +1,85 @@
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="pg-header">
   <div>
-    <h2 class="page-title mb-0">Gestión de Zonas</h2>
-    <p class="text-muted mb-0">{{ zonas.length }} zonas registradas</p>
+    <p class="pg-title">Zonas</p>
+    <p class="pg-sub">{{ zonas.length }} zonas registradas</p>
   </div>
-  <button class="btn btn-primary d-flex align-items-center gap-2" (click)="abrirCrear()">
-    <i class="bi bi-plus-circle-fill"></i> Nueva Zona
+  <button class="btn-add" (click)="abrirCrear()">
+    <i class="bi bi-plus-circle-fill"></i> Nueva
   </button>
 </div>
 
-<div class="card-panel">
-  @if (loading) {
-    <div class="text-center py-4"><div class="spinner-border text-primary"></div></div>
-  } @else {
-    <div class="table-responsive">
-      <table class="table table-hover mb-0">
-        <thead class="table-light">
-          <tr>
-            <th>#</th>
-            <th>Nombre</th>
-            <th>Tipo</th>
-            <th>Descripción</th>
-            <th>Capacidad</th>
-            <th>Estado</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (z of zonas; track z.id) {
-            <tr>
-              <td class="text-muted small">{{ z.id }}</td>
-              <td>
-                <i class="bi {{tipoIcon[z.tipo] || 'bi-geo'}} me-2 text-primary"></i>
-                <strong>{{ z.nombre }}</strong>
-              </td>
-              <td><span class="badge bg-info text-dark">{{ z.tipo }}</span></td>
-              <td class="text-muted small">{{ z.descripcion }}</td>
-              <td>{{ z.capacidadMaxima }} personas</td>
-              <td>
-                @if (z.activa) {
-                  <span class="badge bg-success">Activa</span>
-                } @else {
-                  <span class="badge bg-secondary">Inactiva</span>
-                }
-              </td>
-              <td>
-                <div class="btn-group">
-                  <button class="btn btn-sm btn-outline-primary" (click)="abrirEditar(z)"><i class="bi bi-pencil"></i></button>
-                  <button class="btn btn-sm btn-outline-danger" (click)="eliminar(z.id!)"><i class="bi bi-trash"></i></button>
-                </div>
-              </td>
-            </tr>
-          } @empty {
-            <tr><td colspan="7" class="text-center text-muted py-4">No hay zonas registradas</td></tr>
-          }
-        </tbody>
-      </table>
-    </div>
-  }
+@if (loading) {
+<div class="dark-loading">
+  <div class="ring"></div><span>Cargando...</span>
 </div>
-
-@if (showModal) {
-  <div class="modal-backdrop-custom" (click)="showModal = false"></div>
-  <div class="modal d-block" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">{{ editId ? 'Editar' : 'Nueva' }} Zona</h5>
-          <button type="button" class="btn-close" (click)="showModal = false"></button>
-        </div>
-        <form [formGroup]="form" (ngSubmit)="guardar()">
-          <div class="modal-body">
-            <div class="row g-3">
-              <div class="col-12">
-                <label class="form-label">Nombre *</label>
-                <input type="text" class="form-control" formControlName="nombre" />
-              </div>
-              <div class="col-12">
-                <label class="form-label">Descripción *</label>
-                <textarea class="form-control" formControlName="descripcion" rows="2"></textarea>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Tipo *</label>
-                <select class="form-select" formControlName="tipo">
-                  @for (t of tipos; track t) {
-                    <option [value]="t">{{ t }}</option>
-                  }
-                </select>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Capacidad máxima *</label>
-                <input type="number" class="form-control" formControlName="capacidadMaxima" min="1" />
-              </div>
-              <div class="col-12">
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" formControlName="activa" id="activa" />
-                  <label class="form-check-label" for="activa">Zona activa</label>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" (click)="showModal = false">Cancelar</button>
-            <button type="submit" class="btn btn-primary" [disabled]="form.invalid">
-              <i class="bi bi-floppy me-1"></i>Guardar
-            </button>
-          </div>
-        </form>
+} @else {
+<div class="card-list">
+  @for (z of zonas; track z.id) {
+  <div class="item-card">
+    <div class="item-icon" [style.background]="z.activa ? 'rgba(0,200,100,0.12)' : 'rgba(255,255,255,0.05)'">
+      <i class="bi {{tipoIcon[z.tipo] || 'bi-geo'}}"
+        [style.color]="z.activa ? '#00C864' : 'rgba(255,255,255,0.25)'"></i>
+    </div>
+    <div class="item-body">
+      <div class="item-title">{{ z.nombre }}</div>
+      <div class="item-sub">
+        <span class="chip chip-blue">{{ z.tipo }}</span>
+        &nbsp;· {{ z.capacidadMaxima }} personas
+        &nbsp;<span class="chip" [class.chip-green]="z.activa" [class.chip-gray]="!z.activa">{{ z.activa ? 'Activa' :
+          'Inactiva' }}</span>
       </div>
     </div>
+    <div class="item-actions">
+      <button class="icon-btn icon-btn-edit" (click)="abrirEditar(z)"><i class="bi bi-pencil"></i></button>
+      <button class="icon-btn icon-btn-del" (click)="eliminar(z.id!)"><i class="bi bi-trash3"></i></button>
+    </div>
   </div>
+  } @empty {
+  <div class="empty-state"><i class="bi bi-map"></i>
+    <p>No hay zonas registradas</p>
+  </div>
+  }
+</div>
+}
+
+@if (showModal) {
+<div class="modal-backdrop-custom" (click)="showModal = false"></div>
+<div class="modal-sheet">
+  <div class="sheet-handle"></div>
+  <p class="sheet-title"><i class="bi bi-map me-2"></i>{{ editId ? 'Editar' : 'Nueva' }} Zona</p>
+  <form [formGroup]="form" (ngSubmit)="guardar()">
+    <div class="f-group">
+      <label class="f-label">Nombre *</label>
+      <input type="text" class="f-input" formControlName="nombre" placeholder="Ej: Cancha principal" />
+    </div>
+    <div class="f-group">
+      <label class="f-label">Descripción *</label>
+      <textarea class="f-textarea" formControlName="descripcion" rows="2" placeholder="Describe la zona..."></textarea>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem">
+      <div class="f-group">
+        <label class="f-label">Tipo *</label>
+        <div class="f-select-wrap">
+          <select class="f-select" formControlName="tipo">
+            @for (t of tipos; track t) { <option [value]="t">{{ t }}</option> }
+          </select>
+        </div>
+      </div>
+      <div class="f-group">
+        <label class="f-label">Capacidad *</label>
+        <input type="number" class="f-input" formControlName="capacidadMaxima" min="1" />
+      </div>
+    </div>
+    <div class="f-checkbox-row">
+      <input type="checkbox" formControlName="activa" id="activa" />
+      <label for="activa">Zona activa</label>
+    </div>
+    <div class="sheet-actions">
+      <button type="button" class="btn-sheet-sec" (click)="showModal = false">Cancelar</button>
+      <button type="submit" class="btn-sheet-pri" [disabled]="form.invalid">
+        <i class="bi bi-floppy me-1"></i>Guardar
+      </button>
+    </div>
+  </form>
+</div>
 }

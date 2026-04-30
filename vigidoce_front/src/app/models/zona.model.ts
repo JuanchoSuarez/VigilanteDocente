@@ -14,4 +14,9 @@ export interface Zona {
   tipo: TipoZona;
   capacidadMaxima: number;
   activa: boolean;
+  posX?: number;
+  posY?: number;
+  posWidth?: number;
+  posHeight?: number;
+  imagenMapaUrl?: string;
 }

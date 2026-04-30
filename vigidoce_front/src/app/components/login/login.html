@@ -1,114 +1,166 @@
 <div class="login-screen">
 
-  <!-- Fondo decorativo -->
+  <!-- Background -->
   <div class="login-bg">
+    <svg class="login-grid" preserveAspectRatio="none">
+      <defs>
+        <pattern id="grid-pat" width="40" height="40" patternUnits="userSpaceOnUse">
+          <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,.04)" stroke-width="1"/>
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#grid-pat)"/>
+    </svg>
     <div class="bg-orb bg-orb-1"></div>
     <div class="bg-orb bg-orb-2"></div>
     <div class="bg-orb bg-orb-3"></div>
+    <div class="particle particle-1"></div>
+    <div class="particle particle-2"></div>
+    <div class="particle particle-3"></div>
+    <div class="particle particle-4"></div>
+    <div class="particle particle-5"></div>
+    <div class="particle particle-6"></div>
+    <div class="particle particle-7"></div>
+    <div class="particle particle-8"></div>
+    <div class="particle particle-9"></div>
+    <div class="particle particle-10"></div>
   </div>
 
-  <!-- Notch space -->
-  <div class="login-notch-space"></div>
-
-  <!-- Header branding -->
-  <div class="login-header animate-slide-up">
-    <div class="login-logo-ring">
-      <i class="bi bi-shield-check"></i>
+  <!-- Brand -->
+  <div class="login-brand animate-slide-up">
+    <div class="login-logo">
+      <svg viewBox="0 0 48 48" width="36" height="36">
+        <defs>
+          <linearGradient id="shield-grad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#34d399"/>
+            <stop offset="1" stop-color="#06b6d4"/>
+          </linearGradient>
+        </defs>
+        <path d="M24 4 L8 10 v12 c0 10 7 17 16 20 9-3 16-10 16-20 V10z"
+              fill="none" stroke="url(#shield-grad)" stroke-width="2.5" stroke-linejoin="round"/>
+        <path d="M16 24 l6 6 11-12"
+              fill="none" stroke="url(#shield-grad)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
     </div>
-    <h1 class="login-title">VigilanteDocente</h1>
-    <p class="login-subtitle">Sistema de vigilancia escolar</p>
+    <div class="login-wordmark-wrap">
+      <div class="login-wordmark"><span class="wm-white">Vigi</span><span class="wm-emerald">Docente</span></div>
+      <div class="login-tagline">Sistema integrado de vigilancia escolar</div>
+    </div>
   </div>
 
-  <!-- Card form -->
+  <!-- Card -->
   <div class="login-card animate-slide-up" style="animation-delay:0.08s">
+    <div class="login-card-sheen"></div>
 
-    <div class="login-card-header">
-      <span class="login-card-label">Acceso institucional</span>
+    <!-- Tabs -->
+    <div class="login-tabs">
+      <button class="login-tab" [class.tab-active]="tab === 'login'" (click)="tab = 'login'">Ingresar</button>
+      <button class="login-tab" [class.tab-active]="tab === 'info'" (click)="tab = 'info'">Información</button>
+      <div class="tab-indicator" [class.tab-right]="tab === 'info'"></div>
     </div>
 
-    <!-- Error -->
-    @if (error) {
-      <div class="login-error animate-fade-in">
-        <i class="bi bi-exclamation-triangle-fill"></i>
-        <span>{{ error }}</span>
+    @if (tab === 'login') {
+      @if (error) {
+        <div class="login-error animate-fade-in">
+          <i class="bi bi-exclamation-triangle-fill"></i>
+          <span>{{ error }}</span>
+        </div>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="ingresar()" class="login-form">
+
+        <div class="field-group">
+          <div class="field-label">Correo institucional</div>
+          <div class="input-wrap" [class.focused]="focused === 'email'">
+            <i class="bi bi-envelope field-icon"></i>
+            <input id="login-email" type="email" class="field-input" formControlName="email"
+                   placeholder="nombre@colegio.edu.co" autocomplete="email"
+                   (focus)="focused = 'email'" (blur)="focused = null"/>
+          </div>
+          @if (form.get('email')?.invalid && form.get('email')?.touched) {
+            <div class="field-error">Ingresa un email válido</div>
+          }
+        </div>
+
+        <div class="field-group">
+          <div class="field-label">Contraseña</div>
+          <div class="input-wrap" [class.focused]="focused === 'pass'">
+            <i class="bi bi-lock field-icon"></i>
+            <input id="login-password" [type]="showPass ? 'text' : 'password'" class="field-input"
+                   formControlName="password" placeholder="••••••••" autocomplete="current-password"
+                   (focus)="focused = 'pass'" (blur)="focused = null"/>
+            <button type="button" class="eye-btn" (click)="showPass = !showPass">
+              <i class="bi" [class.bi-eye]="!showPass" [class.bi-eye-slash]="showPass"></i>
+            </button>
+          </div>
+          @if (form.get('password')?.invalid && form.get('password')?.touched) {
+            <div class="field-error">La contraseña es requerida</div>
+          }
+        </div>
+
+        <button id="login-submit-btn" type="submit" class="btn-login" [disabled]="loading">
+          @if (loading) {
+            <span class="spinner-border spinner-border-sm"></span>
+            <span>Verificando...</span>
+          } @else {
+            <i class="bi bi-box-arrow-in-right"></i>
+            <span>Ingresar al sistema</span>
+          }
+        </button>
+      </form>
+
+      <div class="demo-section">
+        <div class="demo-divider">
+          <span class="demo-line"></span>
+          <span class="demo-text">Acceso rápido — demo</span>
+          <span class="demo-line"></span>
+        </div>
+        <div class="demo-list">
+          <button class="demo-item" (click)="form.patchValue({email:'carlos.garcia@colegio.edu.co', password:'1234'})">
+            <span class="demo-pill pill-docente">DOCENTE</span>
+            <span class="demo-name">C. García</span>
+            <i class="bi bi-arrow-right demo-arrow"></i>
+          </button>
+          <button class="demo-item" (click)="form.patchValue({email:'andres.martinez@colegio.edu.co', password:'1234'})">
+            <span class="demo-pill pill-coordinador">COORD</span>
+            <span class="demo-name">A. Martínez</span>
+            <i class="bi bi-arrow-right demo-arrow"></i>
+          </button>
+          <button class="demo-item" (click)="form.patchValue({email:'juan.perez@colegio.edu.co', password:'1234'})">
+            <span class="demo-pill pill-admin">ADMIN</span>
+            <span class="demo-name">J. Pérez</span>
+            <i class="bi bi-arrow-right demo-arrow"></i>
+          </button>
+        </div>
       </div>
     }
 
-    <!-- Form -->
-    <form [formGroup]="form" (ngSubmit)="ingresar()" class="login-form">
-
-      <div class="field-group">
-        <label class="form-label" for="login-email">Correo institucional</label>
-        <div class="input-row">
-          <span class="input-group-text"><i class="bi bi-envelope-fill"></i></span>
-          <input
-            id="login-email"
-            type="email"
-            class="form-control"
-            formControlName="email"
-            placeholder="usuario@colegio.edu.co"
-            autocomplete="email"
-          />
+    @if (tab === 'info') {
+      <div class="info-tab">
+        <div class="info-icon">
+          <i class="bi bi-shield-check"></i>
         </div>
-        @if (form.get('email')?.invalid && form.get('email')?.touched) {
-          <div class="field-error">Ingresa un email válido</div>
-        }
-      </div>
-
-      <div class="field-group">
-        <label class="form-label" for="login-password">Contraseña</label>
-        <div class="input-row">
-          <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
-          <input
-            id="login-password"
-            type="password"
-            class="form-control"
-            formControlName="password"
-            placeholder="••••••••"
-            autocomplete="current-password"
-          />
+        <h3 class="info-title">VigiDocente</h3>
+        <p class="info-desc">Sistema de seguimiento de turnos, zonas e incidentes escolares en tiempo real.</p>
+        <div class="info-roles">
+          <div class="info-role" style="--rc: #34d399">
+            <span class="info-dot"></span><span>Docente</span>
+          </div>
+          <div class="info-role" style="--rc: #fb923c">
+            <span class="info-dot"></span><span>Coordinador</span>
+          </div>
+          <div class="info-role" style="--rc: #c084fc">
+            <span class="info-dot"></span><span>Administrador</span>
+          </div>
         </div>
-        @if (form.get('password')?.invalid && form.get('password')?.touched) {
-          <div class="field-error">La contraseña es requerida</div>
-        }
+        <p class="info-footer">Para crear una cuenta contacta al administrador de tu institución.</p>
       </div>
-
-      <button
-        id="login-submit-btn"
-        type="submit"
-        class="btn-login"
-        [disabled]="loading"
-      >
-        @if (loading) {
-          <span class="spinner-border spinner-border-sm"></span>
-          <span>Verificando...</span>
-        } @else {
-          <i class="bi bi-box-arrow-in-right"></i>
-          <span>Ingresar al sistema</span>
-        }
-      </button>
-    </form>
-
-    <!-- Demo credentials -->
-    <div class="demo-section">
-      <div class="demo-label">Credenciales de prueba — clic para autocompletar</div>
-      <div class="demo-list">
-        <button class="demo-item" (click)="form.patchValue({email:'carlos.garcia@colegio.edu.co', password:'1234'})">
-          <span class="demo-pill pill-docente">DOCENTE</span>
-          <span class="demo-email">carlos.garcia&#64;colegio.edu.co</span>
-        </button>
-        <button class="demo-item" (click)="form.patchValue({email:'andres.martinez@colegio.edu.co', password:'1234'})">
-          <span class="demo-pill pill-coordinador">COORD</span>
-          <span class="demo-email">andres.martinez&#64;colegio.edu.co</span>
-        </button>
-        <button class="demo-item" (click)="form.patchValue({email:'juan.perez@colegio.edu.co', password:'1234'})">
-          <span class="demo-pill pill-admin">ADMIN</span>
-          <span class="demo-email">juan.perez&#64;colegio.edu.co</span>
-        </button>
-      </div>
-    </div>
+    }
   </div>
 
-  <!-- Padding bottom -->
-  <div style="height: 2rem; flex-shrink: 0;"></div>
+  <div class="login-footer">
+    <span>v2.4 · build 2026</span>
+    <span>·</span>
+    <span>Soporte</span>
+  </div>
+
 </div>

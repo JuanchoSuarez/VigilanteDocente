@@ -1,10 +1,11 @@
 /* ── TOKENS DOCENTE ──────────────────────── */
 :host {
-  --primary: #00C896;
-  --primary-dim: rgba(0, 200, 150, 0.15);
-  --surface: #122018;
-  --text: rgba(255, 255, 255, 0.85);
-  --text-muted: rgba(255, 255, 255, 0.4);
+  --primary: #34d399;
+  --primary-dark: #00897b;
+  --primary-dim: rgba(52, 211, 153, 0.14);
+  --surface: #0d1f1a;
+  --text: rgba(255, 255, 255, 0.88);
+  --text-muted: rgba(255, 255, 255, 0.42);
   display: block;
   color: var(--text);
 }
@@ -99,11 +100,12 @@
 
 /* ── TURNO CARD ──────────────────────────── */
 .turno-card {
-  background: linear-gradient(135deg, #0d2b1f 0%, #0a1f17 100%);
-  border: 1px solid rgba(0, 200, 150, 0.2);
-  border-radius: 20px;
-  padding: 1rem;
+  background: linear-gradient(145deg, #0d2b22 0%, #081a14 100%);
+  border: 1px solid rgba(52, 211, 153, 0.2);
+  border-radius: 24px;
+  padding: 1.125rem 1rem;
   margin-bottom: 1rem;
+  box-shadow: 0 8px 24px rgba(0, 137, 123, 0.12);
 }
 
 .turno-card-top {
@@ -163,58 +165,50 @@
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   gap: 0.5rem;
+  margin-top: 0.875rem;
 }
 
 .accion-btn {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.75rem 0.5rem;
-  border: none;
-  border-radius: 14px;
+  gap: 0.5rem;
+  padding: 0.875rem 0.5rem;
+  border-radius: 18px;
   font-size: 0.7rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.15s;
+  line-height: 1.25;
+  text-align: center;
 }
 
-.accion-btn i {
-  font-size: 1.3rem;
-}
-
-.accion-btn span {
-  letter-spacing: 0.2px;
-}
+.accion-btn i { font-size: 1.35rem; }
 
 .accion-checkin {
-  background: var(--primary);
-  color: #0a1a14;
+  background: linear-gradient(160deg, #00897b 0%, #00695c 100%);
+  color: #fff;
+  border: none;
+  box-shadow: 0 6px 16px rgba(0,137,123,.35);
 }
 
-.accion-checkin:hover {
-  background: #00dea8;
-}
+.accion-checkin:hover { filter: brightness(1.08); }
 
 .accion-incidente {
-  background: rgba(255, 193, 7, 0.15);
-  color: #FFC107;
-  border: 1px solid rgba(255, 193, 7, 0.25);
+  background: rgba(234,88,12,.1);
+  color: #fb923c;
+  border: 1.5px solid rgba(234,88,12,.25);
 }
 
-.accion-incidente:hover {
-  background: rgba(255, 193, 7, 0.25);
-}
+.accion-incidente:hover { background: rgba(234,88,12,.18); }
 
 .accion-reas {
-  background: rgba(255, 80, 80, 0.1);
-  color: #FF6B6B;
-  border: 1px solid rgba(255, 80, 80, 0.2);
+  background: rgba(220,38,38,.08);
+  color: #f87171;
+  border: 1.5px solid rgba(220,38,38,.2);
 }
 
-.accion-reas:hover {
-  background: rgba(255, 80, 80, 0.2);
-}
+.accion-reas:hover { background: rgba(220,38,38,.16); }
 
 /* ── SIN TURNO ───────────────────────────── */
 .sin-turno-card {
@@ -252,9 +246,10 @@
   align-items: center;
   gap: 0.6rem;
   background: var(--surface);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 14px;
+  border: 1px solid rgba(52, 211, 153, 0.1);
+  border-radius: 16px;
   padding: 0.625rem 0.75rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,.12);
 }
 
 .stat-chip>i {
@@ -300,8 +295,15 @@
   gap: 0.625rem;
   background: var(--surface);
   border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 12px;
+  border-radius: 16px;
   padding: 0.625rem 0.875rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,.1);
+  transition: border-color 0.2s;
+}
+
+.turno-row-activo {
+  border-color: var(--primary);
+  background: linear-gradient(135deg, rgba(52, 211, 153, 0.06), rgba(0, 137, 123, 0.1));
 }
 
 .turno-row-fecha {
@@ -348,13 +350,29 @@
   bottom: 0;
   left: 0;
   right: 0;
-  background: #0d1f1a;
-  border: 1px solid rgba(0, 200, 150, 0.15);
-  border-radius: 24px 24px 0 0;
-  padding: 1rem 1.125rem 1.5rem;
+  background: #0a1f17;
+  border: 1px solid rgba(52, 211, 153, 0.15);
+  border-radius: 28px 28px 0 0;
+  padding: 0.75rem 1.125rem 1.5rem;
   z-index: 500;
-  max-height: 85%;
+  max-height: 88%;
   overflow-y: auto;
+  box-shadow: 0 -20px 60px rgba(0,0,0,.45);
+}
+
+.progress-bar-wrap {
+  height: 3px;
+  background: rgba(255,255,255,.08);
+  border-radius: 99px;
+  margin: 0 0 1rem;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #34d399, #06b6d4);
+  border-radius: 99px;
+  transition: width .3s ease;
 }
 
 .sheet-handle {
@@ -663,4 +681,27 @@
 
 .mt-2 {
   margin-top: 0.5rem;
+}
+
+.turno-pendiente-alert {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: center;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+.turno-pendiente-alert .btn {
+  margin-top: 0.5rem;
+  background: transparent;
+  color: white;
+  border: 1px solid white;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
 }

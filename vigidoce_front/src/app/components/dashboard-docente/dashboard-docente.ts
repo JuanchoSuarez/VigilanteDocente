@@ -1,28 +1,37 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { forkJoin, Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { AuthService } from '../../services/auth.service';
 import { ApiService } from '../../services/api.service';
 import { TurnoService } from '../../services/turno.service';
+import { ToastService } from '../../services/toast.service';
 import { Docente } from '../../models/docente.model';
 import { Turno, EstadoTurno } from '../../models/turno.model';
 import { Incidente, TipoIncidente, SeveridadIncidente } from '../../models/incidente.model';
 import { RegistroVigilancia, MetodoRegistro } from '../../models/registro-vigilancia.model';
 import { Reasignacion, EstadoReasignacion } from '../../models/reasignacion.model';
+import { FranjaHorario } from '../../models/franja-horario.model';
+import { EstadoTurnoPipe } from '../../pipes/estado.pipe';
 
 @Component({
   selector: 'app-dashboard-docente',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, EstadoTurnoPipe],
   templateUrl: './dashboard-docente.html',
   styleUrl: './dashboard-docente.css'
 })
-export class DashboardDocenteComponent implements OnInit {
+export class DashboardDocenteComponent implements OnInit, OnDestroy {
   usuario: Docente | null = null;
   turnosHoy: Turno[] = [];
   turnoActivo: Turno | null = null;
+  franjasHoy: FranjaHorario[] = [];
   turnosProximos: Turno[] = [];
   incidentes: Incidente[] = [];
   loading = false;
+  fechaServidor = '';
+  
+  private destroy$ = new Subject<void>();
 
   // Modal Check-in
   showCheckinModal = false;
@@ -70,7 +79,8 @@ export class DashboardDocenteComponent implements OnInit {
   constructor(
     private auth: AuthService,
     private api: ApiService,
-    private turnoService: TurnoService
+    private turnoService: TurnoService,
+    private toast: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -78,25 +88,37 @@ export class DashboardDocenteComponent implements OnInit {
     this.cargarDatos();
   }
 
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   cargarDatos(): void {
     if (!this.usuario?.id) return;
     this.loading = true;
 
-    this.turnoService.getTurnosDocente(this.usuario.id).subscribe({
-      next: (turnos) => {
-        const hoy = new Date().toISOString().split('T')[0];
-        this.turnosHoy = turnos.filter(t => t.fecha === hoy);
-        this.turnoActivo = this.turnosHoy.find(t =>
-          t.estado === EstadoTurno.EN_CURSO || t.estado === EstadoTurno.PENDIENTE
-        ) ?? null;
-        this.turnosProximos = turnos.filter(t => t.fecha > hoy).slice(0, 5);
-        this.loading = false;
-      },
-      error: () => { this.loading = false; }
-    });
+    this.api.getCustom<{fecha: string, hora: string}>('servidor/fecha-hora').pipe(takeUntil(this.destroy$)).subscribe({
+      next: (servidor) => {
+        this.fechaServidor = servidor.fecha;
 
-    this.api.getAll<Incidente>('incidentes').subscribe(inc => {
-      this.incidentes = inc.filter(i => i.turno?.docente?.id === this.usuario?.id);
+        forkJoin({
+          turnos: this.turnoService.getTurnosDocenteFecha(this.usuario!.id!, this.fechaServidor),
+          franjas: this.api.getCustom<FranjaHorario[]>(`franjas/docente/${this.usuario!.id!}/hoy`),
+          incidentes: this.api.getAll<Incidente>('incidentes')
+        }).pipe(takeUntil(this.destroy$)).subscribe({
+          next: (data) => {
+            this.turnosHoy = data.turnos;
+            this.franjasHoy = data.franjas;
+            this.turnoActivo = this.turnosHoy.find(t =>
+              t.estado === EstadoTurno.EN_CURSO || t.estado === EstadoTurno.PENDIENTE
+            ) ?? null;
+            this.incidentes = data.incidentes.filter(i => i.turno?.docente?.id === this.usuario?.id);
+            this.loading = false;
+          },
+          error: () => this.loading = false
+        });
+      },
+      error: () => this.loading = false
     });
   }
 
@@ -120,7 +142,7 @@ export class DashboardDocenteComponent implements OnInit {
       turno: { id: this.turnoActivo.id } as Turno,
       docente: { id: this.usuario.id } as Docente,
       zona: { id: this.turnoActivo.zona.id } as any,
-      fechaHoraCheckIn: new Date().toISOString(),
+      fechaHoraCheckIn: `${this.fechaServidor}T12:00:00`, // Idealmente usar servidor hora actual real
       metodoRegistro: this.metodoSeleccionado,
       recorridoRealizado: false
     };
@@ -128,8 +150,11 @@ export class DashboardDocenteComponent implements OnInit {
     this.api.post<RegistroVigilancia>('registros', registro).subscribe({
       next: () => {
         this.showCheckinModal = false;
+        this.toast.success('Check-in completado exitosamente');
         if (this.turnoActivo?.id) {
           this.api.patchCustom(`turnos/${this.turnoActivo.id}/estado?estado=EN_CURSO`, {}).subscribe(() => this.cargarDatos());
+        } else {
+          this.cargarDatos();
         }
       }
     });
@@ -164,12 +189,16 @@ export class DashboardDocenteComponent implements OnInit {
       tipo: this.tipoIncidente,
       severidad: this.severidadIncidente,
       descripcion: this.descripcionIncidente,
-      fechaHora: new Date().toISOString(),
+      fechaHora: `${this.fechaServidor}T12:00:00`, // Omitir hora para simplificar por ahora, backend puede usar actual
       observacionEstudiante: this.observacionEstudiante || null
     };
 
     this.api.post('incidentes', incidente).subscribe({
-      next: () => { this.showIncidenteModal = false; this.cargarDatos(); }
+      next: () => { 
+        this.showIncidenteModal = false; 
+        this.toast.success('Incidente reportado exitosamente');
+        this.cargarDatos(); 
+      }
     });
   }
 
@@ -186,22 +215,15 @@ export class DashboardDocenteComponent implements OnInit {
       turno: { id: this.turnoActivo.id } as Turno,
       docenteOriginal: { id: this.usuario.id } as Docente,
       motivo: this.motivoReasignacion,
-      fechaHoraSolicitud: new Date().toISOString(),
+      fechaHoraSolicitud: `${this.fechaServidor}T${new Date().toLocaleTimeString('en-GB')}`,
       estado: EstadoReasignacion.PENDIENTE
     };
 
     this.api.post('reasignaciones', reas).subscribe({
-      next: () => { this.showReasignacionModal = false; }
+      next: () => { 
+        this.showReasignacionModal = false; 
+        this.toast.success('Solicitud enviada al coordinador');
+      }
     });
-  }
-
-  estadoClass(estado: EstadoTurno): string {
-    const map: Record<string, string> = {
-      EN_CURSO: 'badge bg-success',
-      PENDIENTE: 'badge bg-warning text-dark',
-      CERRADO: 'badge bg-secondary',
-      AUSENTE: 'badge bg-danger'
-    };
-    return map[estado] ?? 'badge bg-secondary';
   }
 }

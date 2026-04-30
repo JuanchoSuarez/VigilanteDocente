@@ -1,5 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { SlicePipe } from '@angular/common';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { ApiService } from '../../services/api.service';
 import { RegistroVigilancia } from '../../models/registro-vigilancia.model';
 
@@ -10,18 +12,26 @@ import { RegistroVigilancia } from '../../models/registro-vigilancia.model';
   templateUrl: './registros.html',
   styleUrl: './registros.css'
 })
-export class RegistrosComponent implements OnInit {
+export class RegistrosComponent implements OnInit, OnDestroy {
   registros: RegistroVigilancia[] = [];
   loading = false;
+  private destroy$ = new Subject<void>();
 
   constructor(private api: ApiService) {}
 
   ngOnInit(): void {
     this.loading = true;
-    this.api.getAll<RegistroVigilancia>('registros').subscribe({
-      next: r => { this.registros = r; this.loading = false; },
-      error: () => { this.loading = false; }
-    });
+    this.api.getAll<RegistroVigilancia>('registros')
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: r => { this.registros = r; this.loading = false; },
+        error: () => { this.loading = false; }
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   metodoClass(m: string): string {

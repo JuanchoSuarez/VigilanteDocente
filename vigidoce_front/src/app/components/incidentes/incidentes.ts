@@ -1,19 +1,24 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { SlicePipe } from '@angular/common';
+import { forkJoin, Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { ApiService } from '../../services/api.service';
+import { CatalogosService } from '../../services/catalogos.service';
+import { ToastService } from '../../services/toast.service';
 import { Incidente, TipoIncidente, SeveridadIncidente } from '../../models/incidente.model';
 import { Turno } from '../../models/turno.model';
 import { Zona } from '../../models/zona.model';
+import { SeveridadIncidentePipe } from '../../pipes/severidad.pipe';
 
 @Component({
   selector: 'app-incidentes',
   standalone: true,
-  imports: [ReactiveFormsModule, SlicePipe],
+  imports: [ReactiveFormsModule, SlicePipe, SeveridadIncidentePipe],
   templateUrl: './incidentes.html',
   styleUrl: './incidentes.css'
 })
-export class IncidentesComponent implements OnInit {
+export class IncidentesComponent implements OnInit, OnDestroy {
   incidentes: Incidente[] = [];
   turnos: Turno[] = [];
   zonas: Zona[] = [];
@@ -25,7 +30,14 @@ export class IncidentesComponent implements OnInit {
   severidades = Object.values(SeveridadIncidente);
   filtroSeveridad = '';
 
-  constructor(private api: ApiService, private fb: FormBuilder) {
+  private destroy$ = new Subject<void>();
+
+  constructor(
+    private api: ApiService, 
+    private fb: FormBuilder,
+    private catalogos: CatalogosService,
+    private toast: ToastService
+  ) {
     this.form = this.fb.group({
       turno: [null, Validators.required],
       zona: [null, Validators.required],
@@ -39,15 +51,29 @@ export class IncidentesComponent implements OnInit {
 
   ngOnInit(): void {
     this.cargar();
-    this.api.getAll<Turno>('turnos').subscribe(t => this.turnos = t);
-    this.api.getAll<Zona>('zonas').subscribe(z => this.zonas = z);
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   cargar(): void {
     this.loading = true;
-    this.api.getAll<Incidente>('incidentes').subscribe({
-      next: i => { this.incidentes = i; this.loading = false; },
-      error: () => { this.loading = false; }
+    forkJoin({
+      incidentes: this.api.getAll<Incidente>('incidentes'),
+      turnos: this.api.getAll<Turno>('turnos'),
+      zonas: this.catalogos.getZonas()
+    }).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (data) => {
+        this.incidentes = data.incidentes;
+        this.turnos = data.turnos;
+        this.zonas = data.zonas;
+        this.loading = false;
+      },
+      error: () => {
+        this.loading = false;
+      }
     });
   }
 
@@ -75,23 +101,24 @@ export class IncidentesComponent implements OnInit {
 
     if (this.editId) {
       this.api.put<Incidente>('incidentes', this.editId, payload).subscribe(() => {
-        this.showModal = false; this.cargar();
+        this.showModal = false; 
+        this.toast.success('Incidente actualizado');
+        this.cargar();
       });
     } else {
       this.api.post<Incidente>('incidentes', payload).subscribe(() => {
-        this.showModal = false; this.cargar();
+        this.showModal = false; 
+        this.toast.success('Incidente creado');
+        this.cargar();
       });
     }
   }
 
   eliminar(id: number): void {
     if (!confirm('¿Eliminar este incidente?')) return;
-    this.api.delete('incidentes', id).subscribe(() => this.cargar());
-  }
-
-  severidadClass(sev: string): string {
-    if (sev === 'S3_ATENCION_INMEDIATA') return 'badge bg-danger';
-    if (sev === 'S2_SEGUIMIENTO') return 'badge bg-warning text-dark';
-    return 'badge bg-success';
+    this.api.delete('incidentes', id).subscribe(() => {
+      this.toast.success('Incidente eliminado');
+      this.cargar();
+    });
   }
 }

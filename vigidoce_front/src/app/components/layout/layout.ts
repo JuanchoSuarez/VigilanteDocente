@@ -1,12 +1,15 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { ApiService } from '../../services/api.service';
 import { Docente } from '../../models/docente.model';
+
+import { RolDocentePipe } from '../../pipes/rol.pipe';
 
 @Component({
   selector: 'app-layout',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, RolDocentePipe],
   templateUrl: './layout.html',
   styleUrl: './layout.css'
 })
@@ -16,13 +19,30 @@ export class LayoutComponent implements OnInit, OnDestroy {
   sidebarOpen = false;
   private intervalo: ReturnType<typeof setInterval> | null = null;
 
-  constructor(private auth: AuthService, private router: Router) {}
+  constructor(private auth: AuthService, private router: Router, private api: ApiService) {}
 
   ngOnInit(): void {
     this.usuario = this.auth.getUsuarioActual();
-    this.actualizarHora();
-    this.intervalo = setInterval(() => this.actualizarHora(), 1000);
     this.aplicarRolAlBody();
+
+    // Sync clock with server
+    this.api.getCustom<{hora: string, fecha: string}>('servidor/fecha-hora').subscribe({
+      next: (data) => {
+        const parts = data.hora.split(':');
+        const d = new Date();
+        d.setHours(+parts[0], +parts[1], +parts[2] || 0);
+        this.actualizarHoraDesde(d);
+        this.intervalo = setInterval(() => {
+          d.setSeconds(d.getSeconds() + 1);
+          this.actualizarHoraDesde(d);
+        }, 1000);
+      },
+      error: () => {
+        // Fallback to local time
+        this.actualizarHora();
+        this.intervalo = setInterval(() => this.actualizarHora(), 1000);
+      }
+    });
   }
 
   private aplicarRolAlBody(): void {
@@ -42,6 +62,10 @@ export class LayoutComponent implements OnInit, OnDestroy {
     this.horaActual = new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
   }
 
+  private actualizarHoraDesde(d: Date): void {
+    this.horaActual = d.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  }
+
   logout(): void {
     this.auth.logout();
     this.router.navigate(['/login']);
@@ -50,24 +74,6 @@ export class LayoutComponent implements OnInit, OnDestroy {
   get iniciales(): string {
     if (!this.usuario) return '??';
     return `${this.usuario.nombre[0]}${this.usuario.apellido[0]}`.toUpperCase();
-  }
-
-  get rolLabel(): string {
-    const map: Record<string, string> = {
-      DOCENTE: 'Docente',
-      COORDINADOR: 'Coordinador',
-      ADMINISTRADOR: 'Administrador'
-    };
-    return map[this.usuario?.rol ?? ''] ?? this.usuario?.rol ?? '';
-  }
-
-  get rolClass(): string {
-    const map: Record<string, string> = {
-      DOCENTE: 'badge-docente',
-      COORDINADOR: 'badge-coordinador',
-      ADMINISTRADOR: 'badge-admin'
-    };
-    return map[this.usuario?.rol ?? ''] ?? 'bg-secondary';
   }
 
   get isDocente(): boolean { return this.usuario?.rol === 'DOCENTE'; }

@@ -15,14 +15,16 @@
 </div>
 
 @if (loading) {
-<div class="dark-loading">
-  <div class="ring"></div><span>Cargando...</span>
+<div class="card-list">
+  <div class="skeleton skeleton-card" style="height: 80px;"></div>
+  <div class="skeleton skeleton-card" style="height: 80px;"></div>
+  <div class="skeleton skeleton-card" style="height: 80px;"></div>
 </div>
 } @else {
 <div class="card-list">
   @for (d of docentesFiltrados; track d.id) {
   <div class="item-card">
-    <div class="avatar-pill" [class]="rolClass(d.rol)">{{ d.nombre[0] }}{{ d.apellido[0] }}</div>
+    <div class="avatar-pill" [class]="d.rol | rolDocente:'class'">{{ d.nombre[0] }}{{ d.apellido[0] }}</div>
     <div class="item-body">
       <div class="item-title">{{ d.nombre }} {{ d.apellido }}</div>
       <div class="item-sub">

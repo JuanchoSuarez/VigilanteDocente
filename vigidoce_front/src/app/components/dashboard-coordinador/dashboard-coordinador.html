@@ -39,7 +39,10 @@
     Estado de Zonas
   </div>
   @if (loading) {
-    <div class="loading-state"><div class="spinner-border"></div></div>
+    <div class="zonas-grid" style="padding: 1rem;">
+      <div class="skeleton skeleton-card" style="height: 80px;"></div>
+      <div class="skeleton skeleton-card" style="height: 80px;"></div>
+    </div>
   } @else {
     <div class="zonas-grid">
       @for (zona of zonas; track zona.id) {
@@ -90,7 +93,7 @@
             <td class="fw-semibold">{{ t.zona?.nombre }}</td>
             <td>{{ t.docente?.nombre }} {{ t.docente?.apellido }}</td>
             <td>{{ t.horaInicio }}–{{ t.horaFin }}</td>
-            <td><span [class]="estadoClass(t.estado)">{{ t.estado }}</span></td>
+            <td><span [class]="t.estado | estadoTurno:'class'">{{ t.estado | estadoTurno }}</span></td>
             <td>
               @if (t.estado === 'PENDIENTE' || t.estado === 'AUSENTE') {
                 <button class="btn btn-sm btn-outline-warning" (click)="abrirReasignar(t)">
@@ -132,7 +135,7 @@
     <div class="inc-item">
       <div class="inc-top">
         <strong class="inc-zona">{{ inc.zona?.nombre }}</strong>
-        <span [class]="severidadClass(inc.severidad)">{{ inc.severidad }}</span>
+        <span [class]="inc.severidad | severidadIncidente:'class'">{{ inc.severidad | severidadIncidente }}</span>
       </div>
       <p class="inc-desc">{{ inc.descripcion }}</p>
     </div>

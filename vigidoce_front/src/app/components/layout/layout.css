@@ -1,6 +1,6 @@
 :host {
   display: block;
-  height: 100%;
+  height: 100dvh;
 }
 
 /* ── TOKENS ─────────────────────────────────── */
@@ -25,7 +25,7 @@
 /* ── LAYOUT ─────────────────────────────────── */
 .app-container {
   display: flex;
-  height: 100%;
+  height: 100dvh;
   overflow: hidden;
   position: relative;
   background: #0a0f0d;
@@ -55,8 +55,29 @@
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+body.rol-coordinador .sidebar { background: #0d1b2a; border-right-color: rgba(230,81,0,.15); }
+body.rol-admin       .sidebar { background: #1c1c2e; border-right-color: rgba(106,27,154,.2); }
+
 .app-container.sidebar-open .sidebar {
   transform: translateX(0);
+}
+
+@media (min-width: 768px) {
+  .sidebar {
+    transform: translateX(0);
+  }
+  .main-area {
+    margin-left: 270px;
+  }
+  .sidebar-overlay {
+    display: none;
+  }
+  .btn-menu {
+    display: none;
+  }
+  .btn-close-sidebar {
+    display: none;
+  }
 }
 
 .sidebar-header {
@@ -72,14 +93,17 @@
   align-items: center;
   gap: 0.5rem;
   color: white;
-  font-weight: 700;
-  font-size: 1.1rem;
+  font-weight: 500;
+  font-size: 1.05rem;
+  letter-spacing: -0.01em;
 }
 
-.sidebar-brand i {
-  color: #00C896;
-  font-size: 1.3rem;
-}
+.sidebar-brand strong { font-weight: 800; }
+
+.sidebar-brand svg { color: #34d399; flex-shrink: 0; }
+
+body.rol-coordinador .sidebar-brand svg { color: #ff9248; }
+body.rol-admin       .sidebar-brand svg { color: #d8b4fe; }
 
 .btn-close-sidebar {
   background: rgba(255, 255, 255, 0.07);
@@ -180,6 +204,9 @@
   color: #00C896;
 }
 
+body.rol-coordinador .nav-item.active { background: rgba(230,81,0,.14); color: #ff9248; }
+body.rol-admin       .nav-item.active { background: rgba(106,27,154,.22); color: #d8b4fe; }
+
 .nav-label {
   color: rgba(255, 255, 255, 0.2);
   font-size: 0.65rem;
@@ -236,19 +263,27 @@
   background: #0a0f0d;
 }
 
+body.rol-docente     .top-bar { background: linear-gradient(180deg, #00897b, #006f63); border-bottom-color: rgba(255,255,255,.08); }
+body.rol-coordinador .top-bar { background: #0d1b2a; border-bottom-color: rgba(230,81,0,.18); }
+body.rol-admin       .top-bar { background: #1c1c2e; border-bottom-color: rgba(106,27,154,.25); }
+
 .top-bar-brand {
   display: flex;
   align-items: center;
   gap: 0.4rem;
   color: white;
-  font-weight: 700;
+  font-weight: 500;
   font-size: 1rem;
   flex: 1;
+  letter-spacing: -0.01em;
 }
 
-.top-bar-brand i {
-  color: #00C896;
-}
+.top-bar-brand strong { font-weight: 800; }
+
+.top-bar-brand svg { color: #34d399; }
+body.rol-docente     .top-bar-brand svg { color: rgba(255,255,255,.9); }
+body.rol-coordinador .top-bar-brand svg { color: #ff9248; }
+body.rol-admin       .top-bar-brand svg { color: #d8b4fe; }
 
 .top-bar-right {
   display: flex;
@@ -323,18 +358,22 @@
   flex-shrink: 0;
   position: relative;
   z-index: 50;
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 .bottom-nav-docente {
-  background: #0d1f1a;
+  background: #0a1f17;
+  border-top-color: rgba(0,137,123,.2);
 }
 
 .bottom-nav-coord {
-  background: #1a110a;
+  background: #0d1b2a;
+  border-top-color: rgba(230,81,0,.18);
 }
 
 .bottom-nav-admin {
-  background: #0f0d1a;
+  background: #1c1c2e;
+  border-top-color: rgba(106,27,154,.2);
 }
 
 .bnav-item {
@@ -359,16 +398,16 @@
 }
 
 .bottom-nav-docente .bnav-item.bnav-active {
-  color: var(--doc-primary);
-  background: rgba(0, 200, 150, 0.12);
+  color: #34d399;
+  background: rgba(52, 211, 153, 0.12);
 }
 
 .bottom-nav-coord .bnav-item.bnav-active {
-  color: var(--coord-primary);
-  background: rgba(255, 140, 66, 0.12);
+  color: #ff9248;
+  background: rgba(230, 81, 0, 0.14);
 }
 
 .bottom-nav-admin .bnav-item.bnav-active {
-  color: var(--admin-primary);
-  background: rgba(129, 140, 248, 0.12);
+  color: #d8b4fe;
+  background: rgba(106, 27, 154, 0.22);
 }

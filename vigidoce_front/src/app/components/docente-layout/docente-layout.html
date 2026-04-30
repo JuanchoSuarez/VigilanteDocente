@@ -1,0 +1,88 @@
+<div class="docente-container" [class.sidebar-open]="sidebarOpen">
+
+  <!-- OVERLAY MÓVIL -->
+  @if (sidebarOpen) {
+    <div class="sidebar-overlay" (click)="toggleSidebar()"></div>
+  }
+
+  <!-- SIDEBAR (SOLO PARA MÓVIL Y PERFIL) -->
+  <aside class="docente-sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-brand">
+        <i class="bi bi-shield-check"></i>
+        <span>VigiDoc</span>
+      </div>
+      <button class="btn-close-sidebar" (click)="toggleSidebar()">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+
+    <div class="sidebar-user">
+      <div class="avatar-pill" [class]="usuario?.rol | rolDocente:'class'">{{ iniciales }}</div>
+      <div>
+        <div class="user-name">{{ usuario?.nombre }} {{ usuario?.apellido }}</div>
+        <div class="user-role">{{ usuario?.rol | rolDocente }}</div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <!-- Navegación redundante en caso de querer usar sidebar en móvil -->
+      <a routerLink="/docente/dashboard" routerLinkActive="active" class="nav-item" (click)="toggleSidebar()">
+        <i class="bi bi-house-fill"></i><span>Inicio</span>
+      </a>
+      <a routerLink="/docente/turnos" routerLinkActive="active" class="nav-item" (click)="toggleSidebar()">
+        <i class="bi bi-calendar-check-fill"></i><span>Mis Turnos</span>
+      </a>
+      <a routerLink="/docente/incidentes" routerLinkActive="active" class="nav-item" (click)="toggleSidebar()">
+        <i class="bi bi-exclamation-triangle-fill"></i><span>Mis Incidentes</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="btn-logout" (click)="logout()">
+        <i class="bi bi-box-arrow-left"></i> Cerrar sesión
+      </button>
+    </div>
+  </aside>
+
+  <!-- TOP BAR FIJA -->
+  <header class="docente-topbar">
+    <div class="top-left">
+      <i class="bi bi-shield-check brand-icon"></i>
+      <span class="brand-text">VigiDoc</span>
+    </div>
+    
+    <div class="top-center">
+      <div class="hora-pill">
+        <i class="bi bi-clock"></i>
+        {{ horaActual }}
+      </div>
+    </div>
+
+    <div class="top-right">
+      <div class="avatar-sm" [class]="usuario?.rol | rolDocente:'class'" (click)="toggleSidebar()">{{ iniciales }}</div>
+      <button class="btn-menu-mobile" (click)="toggleSidebar()">
+        <i class="bi bi-list"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="docente-main">
+    <router-outlet></router-outlet>
+  </main>
+
+  <!-- BOTTOM NAV FIJA -->
+  <nav class="docente-bottom-nav">
+    <a routerLink="/docente/dashboard" routerLinkActive="bnav-active" class="bnav-item">
+      <i class="bi bi-house-fill"></i><span>Inicio</span>
+    </a>
+    <a routerLink="/docente/turnos" routerLinkActive="bnav-active" class="bnav-item">
+      <i class="bi bi-calendar-check-fill"></i><span>Turnos</span>
+    </a>
+    <a routerLink="/docente/incidentes" routerLinkActive="bnav-active" class="bnav-item">
+      <i class="bi bi-exclamation-triangle-fill"></i><span>Incidentes</span>
+    </a>
+  </nav>
+
+</div>

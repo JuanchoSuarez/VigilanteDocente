@@ -14,6 +14,8 @@ public interface TurnoRepository extends JpaRepository<Turno, Long> {
 
     // --- Queries derivados por nombre (ya existían) ---
     List<Turno> findByFecha(LocalDate fecha);
+    List<Turno> findByDocenteIdAndFecha(Long docenteId, LocalDate fecha);
+    boolean existsByDocenteIdAndZonaIdAndFechaAndHoraInicio(Long docenteId, Long zonaId, LocalDate fecha, java.time.LocalTime horaInicio);
     List<Turno> findByEstado(EstadoTurno estado);
     List<Turno> findByDocenteId(Long docenteId);
     List<Turno> findByZonaId(Long zonaId);

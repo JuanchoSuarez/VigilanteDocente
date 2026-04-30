@@ -1,21 +1,27 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { forkJoin, Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { TurnoService } from '../../services/turno.service';
 import { ApiService } from '../../services/api.service';
+import { CatalogosService } from '../../services/catalogos.service';
+import { ToastService } from '../../services/toast.service';
 import { Turno, EstadoTurno, TipoFranja } from '../../models/turno.model';
 import { Incidente } from '../../models/incidente.model';
 import { Zona } from '../../models/zona.model';
 import { Reasignacion, EstadoReasignacion } from '../../models/reasignacion.model';
 import { Docente } from '../../models/docente.model';
+import { EstadoTurnoPipe } from '../../pipes/estado.pipe';
+import { SeveridadIncidentePipe } from '../../pipes/severidad.pipe';
 
 @Component({
   selector: 'app-dashboard-coordinador',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, EstadoTurnoPipe, SeveridadIncidentePipe],
   templateUrl: './dashboard-coordinador.html',
   styleUrl: './dashboard-coordinador.css'
 })
-export class DashboardCoordinadorComponent implements OnInit {
+export class DashboardCoordinadorComponent implements OnInit, OnDestroy {
   turnosHoy: Turno[] = [];
   incidentes: Incidente[] = [];
   zonas: Zona[] = [];
@@ -23,6 +29,9 @@ export class DashboardCoordinadorComponent implements OnInit {
   reasignacionesPendientes: Reasignacion[] = [];
   loading = false;
   filtroFranja: string = 'TODOS';
+  fechaServidor = '';
+  
+  private destroy$ = new Subject<void>();
 
   // Modal reasignar
   showReasignarModal = false;
@@ -30,6 +39,10 @@ export class DashboardCoordinadorComponent implements OnInit {
   docenteReemplazoId: number | null = null;
 
   get hoy(): string {
+    if (this.fechaServidor) {
+      const [y, m, d] = this.fechaServidor.split('-').map(Number);
+      return new Date(y, m - 1, d).toLocaleDateString('es-CO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    }
     return new Date().toLocaleDateString('es-CO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
   }
 
@@ -42,26 +55,54 @@ export class DashboardCoordinadorComponent implements OnInit {
     return this.turnosHoy.filter(t => t.estado === EstadoTurno.AUSENTE || t.estado === EstadoTurno.PENDIENTE);
   }
 
-  constructor(private turnoService: TurnoService, private api: ApiService) {}
+  constructor(
+    private turnoService: TurnoService, 
+    private api: ApiService,
+    private catalogos: CatalogosService,
+    private toast: ToastService
+  ) {}
 
   ngOnInit(): void {
     this.loading = true;
-    const hoy = new Date().toISOString().split('T')[0];
 
-    this.turnoService.getTurnosPorFecha(hoy).subscribe({
-      next: (t) => { this.turnosHoy = t; this.loading = false; },
-      error: () => { this.loading = false; }
+    this.api.getCustom<{fecha: string, hora: string}>('servidor/fecha-hora').pipe(takeUntil(this.destroy$)).subscribe({
+      next: (srv) => {
+        this.fechaServidor = srv.fecha;
+        this.cargarDatosConFecha(srv.fecha);
+      },
+      error: () => {
+        // Fallback a fecha local si el servidor no responde
+        this.fechaServidor = new Date().toISOString().split('T')[0];
+        this.cargarDatosConFecha(this.fechaServidor);
+      }
     });
+  }
 
-    this.api.getAll<Incidente>('incidentes').subscribe(i => {
-      this.incidentes = i.slice(0, 5);
+  private cargarDatosConFecha(hoy: string): void {
+    forkJoin({
+      turnos: this.turnoService.getTurnosPorFecha(hoy),
+      incidentes: this.api.getAll<Incidente>('incidentes'),
+      zonas: this.catalogos.getZonas(),
+      docentes: this.catalogos.getDocentes(),
+      reasignaciones: this.api.getAll<Reasignacion>('reasignaciones')
+    }).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (data) => {
+        this.turnosHoy = data.turnos;
+        this.incidentes = data.incidentes.slice(0, 5);
+        this.zonas = data.zonas;
+        this.docentes = data.docentes.filter(doc => doc.activo);
+        this.reasignacionesPendientes = data.reasignaciones.filter(re => re.estado === EstadoReasignacion.PENDIENTE);
+        this.loading = false;
+      },
+      error: () => {
+        this.loading = false;
+      }
     });
+  }
 
-    this.api.getAll<Zona>('zonas').subscribe(z => this.zonas = z);
-    this.api.getAll<Docente>('docentes').subscribe(d => this.docentes = d.filter(doc => doc.activo));
-    this.api.getAll<Reasignacion>('reasignaciones').subscribe(r => {
-      this.reasignacionesPendientes = r.filter(re => re.estado === EstadoReasignacion.PENDIENTE);
-    });
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   getStatusZona(zona: Zona): 'verde' | 'amarillo' | 'rojo' {
@@ -95,23 +136,11 @@ export class DashboardCoordinadorComponent implements OnInit {
       estado: EstadoReasignacion.ACEPTADA
     };
     this.api.post('reasignaciones', reas).subscribe({
-      next: () => { this.showReasignarModal = false; this.ngOnInit(); }
+      next: () => { 
+        this.showReasignarModal = false; 
+        this.toast.success('Reasignación completada');
+        this.ngOnInit(); 
+      }
     });
-  }
-
-  estadoClass(estado: EstadoTurno): string {
-    const map: Record<string, string> = {
-      EN_CURSO: 'badge bg-success',
-      PENDIENTE: 'badge bg-warning text-dark',
-      CERRADO: 'badge bg-secondary',
-      AUSENTE: 'badge bg-danger'
-    };
-    return map[estado] ?? 'badge bg-secondary';
-  }
-
-  severidadClass(sev: string): string {
-    if (sev === 'S3_ATENCION_INMEDIATA') return 'badge bg-danger';
-    if (sev === 'S2_SEGUIMIENTO') return 'badge bg-warning text-dark';
-    return 'badge bg-success';
   }
 }

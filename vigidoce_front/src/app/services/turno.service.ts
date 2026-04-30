@@ -11,6 +11,10 @@ export class TurnoService {
     return this.api.getCustom<Turno[]>(`turnos/docente/${docenteId}`);
   }
 
+  getTurnosDocenteFecha(docenteId: number, fecha: string): Observable<Turno[]> {
+    return this.api.getCustom<Turno[]>(`turnos/docente/${docenteId}/fecha/${fecha}`);
+  }
+
   getTurnosPorFecha(fecha: string): Observable<Turno[]> {
     return this.api.getCustom<Turno[]>(`turnos/fecha/${fecha}`);
   }

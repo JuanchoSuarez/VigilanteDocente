@@ -20,11 +20,13 @@ public class DataLoader implements CommandLineRunner {
     private final ReasignacionRepository reasignacionRepository;
     private final RegistroVigilanciaRepository registroVigilanciaRepository;
     private final PerfilDocenteRepository perfilDocenteRepository;
+    private final HorarioRepository horarioRepository;
+    private final FranjaHorarioRepository franjaHorarioRepository;
 
     @Override
     public void run(String... args) throws Exception {
 
-        if (docenteRepository.count() > 0) return;
+        if (docenteRepository.count() == 0) {
 
         System.out.println("🚀 Iniciando carga de datos...");
 
@@ -133,6 +135,48 @@ public class DataLoader implements CommandLineRunner {
                 .tipo(TipoZona.CORREDOR).capacidadMaxima(60).activa(true).build());
 
         System.out.println("✅ " + zonaRepository.count() + " zonas cargadas");
+
+        // --- HORARIOS Y FRANJAS ---
+        System.out.println("📋 Cargando horarios y franjas...");
+        Horario horarioPrincipal = horarioRepository.save(Horario.builder()
+                .nombre("Cronograma Semanal 2026")
+                .descripcion("Horario general de vigilancia")
+                .activo(true)
+                .build());
+
+        String diaStr = LocalDate.now().getDayOfWeek().name();
+        DiaSemana diaHoy = switch (diaStr) {
+            case "MONDAY" -> DiaSemana.LUNES;
+            case "TUESDAY" -> DiaSemana.MARTES;
+            case "WEDNESDAY" -> DiaSemana.MIERCOLES;
+            case "THURSDAY" -> DiaSemana.JUEVES;
+            case "FRIDAY" -> DiaSemana.VIERNES;
+            case "SATURDAY" -> DiaSemana.SABADO;
+            case "SUNDAY" -> DiaSemana.DOMINGO;
+            default -> DiaSemana.LUNES;
+        };
+
+        franjaHorarioRepository.save(FranjaHorario.builder()
+                .horario(horarioPrincipal).docente(d1).zona(z1)
+                .diaSemana(diaHoy).horaInicio(LocalTime.of(10, 0)).horaFin(LocalTime.of(10, 30))
+                .tipoFranja(TipoFranja.RECREO).activo(true).build());
+
+        franjaHorarioRepository.save(FranjaHorario.builder()
+                .horario(horarioPrincipal).docente(d2).zona(z2)
+                .diaSemana(diaHoy).horaInicio(LocalTime.of(12, 0)).horaFin(LocalTime.of(13, 0))
+                .tipoFranja(TipoFranja.ALMUERZO).activo(true).build());
+
+        franjaHorarioRepository.save(FranjaHorario.builder()
+                .horario(horarioPrincipal).docente(d4).zona(z3)
+                .diaSemana(diaHoy).horaInicio(LocalTime.of(10, 0)).horaFin(LocalTime.of(10, 30))
+                .tipoFranja(TipoFranja.RECREO).activo(true).build());
+
+        franjaHorarioRepository.save(FranjaHorario.builder()
+                .horario(horarioPrincipal).docente(d6).zona(z4)
+                .diaSemana(diaHoy).horaInicio(LocalTime.of(12, 0)).horaFin(LocalTime.of(13, 0))
+                .tipoFranja(TipoFranja.ALMUERZO).activo(true).build());
+
+        System.out.println("✅ " + franjaHorarioRepository.count() + " franjas cargadas");
 
         // --- TURNOS ---
         System.out.println("📋 Cargando turnos...");
@@ -287,5 +331,14 @@ public class DataLoader implements CommandLineRunner {
         System.out.println("✅ " + reasignacionRepository.count() + " reasignaciones cargadas");
 
         System.out.println("🎉 ¡Carga completa de datos finalizada exitosamente!");
+        }
+
+        // --- PASSWORD UPDATE (if empty) ---
+        for (Docente d : docenteRepository.findAll()) {
+            if (d.getPassword() == null || d.getPassword().isEmpty()) {
+                d.setPassword("1234");
+                docenteRepository.save(d);
+            }
+        }
     }
 }

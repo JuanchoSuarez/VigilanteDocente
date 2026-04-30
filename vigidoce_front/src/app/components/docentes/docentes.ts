@@ -1,16 +1,21 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { ApiService } from '../../services/api.service';
+import { CatalogosService } from '../../services/catalogos.service';
+import { ToastService } from '../../services/toast.service';
 import { Docente, RolDocente } from '../../models/docente.model';
+import { RolDocentePipe } from '../../pipes/rol.pipe';
 
 @Component({
   selector: 'app-docentes',
   standalone: true,
-  imports: [ReactiveFormsModule, FormsModule],
+  imports: [ReactiveFormsModule, FormsModule, RolDocentePipe],
   templateUrl: './docentes.html',
   styleUrl: './docentes.css'
 })
-export class DocentesComponent implements OnInit {
+export class DocentesComponent implements OnInit, OnDestroy {
   docentes: Docente[] = [];
   loading = false;
   showModal = false;
@@ -18,8 +23,15 @@ export class DocentesComponent implements OnInit {
   form: FormGroup;
   buscador = '';
   roles = Object.values(RolDocente);
+  
+  private destroy$ = new Subject<void>();
 
-  constructor(private api: ApiService, private fb: FormBuilder) {
+  constructor(
+    private api: ApiService, 
+    private fb: FormBuilder,
+    private catalogos: CatalogosService,
+    private toast: ToastService
+  ) {
     this.form = this.fb.group({
       nombre: ['', Validators.required],
       apellido: ['', Validators.required],
@@ -33,9 +45,14 @@ export class DocentesComponent implements OnInit {
 
   ngOnInit(): void { this.cargar(); }
 
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   cargar(): void {
     this.loading = true;
-    this.api.getAll<Docente>('docentes').subscribe({
+    this.catalogos.getDocentes().pipe(takeUntil(this.destroy$)).subscribe({
       next: d => { this.docentes = d; this.loading = false; },
       error: () => { this.loading = false; }
     });
@@ -74,23 +91,27 @@ export class DocentesComponent implements OnInit {
 
     if (this.editId) {
       this.api.put<Docente>('docentes', this.editId, data).subscribe(() => {
-        this.showModal = false; this.cargar();
+        this.showModal = false; 
+        this.toast.success('Docente actualizado');
+        this.catalogos.invalidarDocentes();
+        this.cargar();
       });
     } else {
       this.api.post<Docente>('docentes', data).subscribe(() => {
-        this.showModal = false; this.cargar();
+        this.showModal = false; 
+        this.toast.success('Docente creado');
+        this.catalogos.invalidarDocentes();
+        this.cargar();
       });
     }
   }
 
   eliminar(id: number): void {
     if (!confirm('¿Seguro que deseas eliminar este docente?')) return;
-    this.api.delete('docentes', id).subscribe(() => this.cargar());
-  }
-
-  rolClass(rol: string): string {
-    if (rol === 'DOCENTE') return 'badge-docente';
-    if (rol === 'COORDINADOR') return 'badge-coordinador';
-    return 'badge-admin';
+    this.api.delete('docentes', id).subscribe(() => {
+      this.toast.success('Docente eliminado');
+      this.catalogos.invalidarDocentes();
+      this.cargar();
+    });
   }
 }

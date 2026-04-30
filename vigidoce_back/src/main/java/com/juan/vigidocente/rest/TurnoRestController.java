@@ -60,6 +60,11 @@ public class TurnoRestController {
 
     // ── Endpoints adicionales ──────────────────────────────────────────────────
 
+    @PostMapping("/generar-desde-horario")
+    public List<Turno> generarDesdeHorario() {
+        return turnoService.generarDesdeHorario();
+    }
+
     @GetMapping("/pendientes-hoy")
     public List<Turno> pendientesHoy() {
         return turnoService.buscarPendientesHoy();
@@ -73,6 +78,11 @@ public class TurnoRestController {
     @GetMapping("/fecha/{fecha}")
     public List<Turno> porFechaAlias(@PathVariable String fecha) {
         return turnoService.buscarPorFecha(LocalDate.parse(fecha));
+    }
+
+    @GetMapping("/docente/{docenteId}/fecha/{fecha}")
+    public List<Turno> porDocenteYFecha(@PathVariable Long docenteId, @PathVariable String fecha) {
+        return turnoService.buscarPorDocenteYFecha(docenteId, LocalDate.parse(fecha));
     }
 
     @GetMapping("/por-docente/{docenteId}")

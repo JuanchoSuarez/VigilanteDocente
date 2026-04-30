@@ -14,9 +14,11 @@
 
 <!-- LOADING -->
 @if (loading) {
-<div class="doc-loading">
-  <div class="loading-ring"></div>
-  <p>Cargando...</p>
+<div class="skeleton skeleton-card" style="margin-bottom: 1rem; height: 180px;"></div>
+<div class="stats-row" style="margin-bottom: 1rem;">
+  <div class="skeleton skeleton-card" style="height: 60px;"></div>
+  <div class="skeleton skeleton-card" style="height: 60px;"></div>
+  <div class="skeleton skeleton-card" style="height: 60px;"></div>
 </div>
 }
 
@@ -42,26 +44,46 @@
   </div>
 
   <!-- 3 ACCIONES GRANDES -->
-  <div class="acciones-grid">
-    <button class="accion-btn accion-checkin" (click)="abrirCheckin()">
-      <i class="bi bi-geo-alt-fill"></i>
-      <span>Check-in</span>
-    </button>
-    <button class="accion-btn accion-incidente" (click)="abrirIncidente()">
-      <i class="bi bi-exclamation-triangle-fill"></i>
-      <span>Incidente</span>
-    </button>
-    <button class="accion-btn accion-reas" (click)="abrirReasignacion()">
-      <i class="bi bi-person-dash-fill"></i>
-      <span>No puedo</span>
-    </button>
-  </div>
+  @if (turnoActivo.estado === 'EN_CURSO') {
+    <div class="acciones-grid">
+      <button class="accion-btn accion-checkin" (click)="abrirCheckin()">
+        <i class="bi bi-geo-alt-fill"></i>
+        <span>Check-in</span>
+      </button>
+      <button class="accion-btn accion-incidente" (click)="abrirIncidente()">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <span>Incidente</span>
+      </button>
+      <button class="accion-btn accion-reas" (click)="abrirReasignacion()">
+        <i class="bi bi-person-dash-fill"></i>
+        <span>No puedo</span>
+      </button>
+    </div>
+  } @else {
+    <div class="turno-pendiente-alert">
+      <i class="bi bi-clock"></i>
+      <span>Tu turno comenzará a las {{ turnoActivo.horaInicio }}. Prepárate para el check-in.</span>
+      <button class="btn btn-sm btn-outline-light ms-2" (click)="abrirCheckin()">Hacer Check-in anticipado</button>
+    </div>
+  }
 </div>
 } @else {
-<div class="sin-turno-card">
-  <i class="bi bi-moon-stars-fill"></i>
-  <p>No tienes turnos activos hoy</p>
-</div>
+  @if (franjasHoy.length > 0 && turnosHoy.length === 0) {
+    <div class="sin-turno-card">
+      <i class="bi bi-clock-history"></i>
+      <p>El administrador aún no generó los turnos de hoy</p>
+    </div>
+  } @else if (turnosHoy.length > 0) {
+    <div class="sin-turno-card" style="background: linear-gradient(135deg, rgba(52, 211, 153, 0.1), rgba(0, 137, 123, 0.2)); border: 1px solid rgba(52, 211, 153, 0.3);">
+      <i class="bi bi-stars" style="color: #34d399"></i>
+      <p>Has completado tus turnos de hoy. ¡Buen trabajo!</p>
+    </div>
+  } @else {
+    <div class="sin-turno-card">
+      <i class="bi bi-moon-stars-fill"></i>
+      <p>No tienes turnos asignados hoy</p>
+    </div>
+  }
 }
 
 <!-- STATS ROW -->
@@ -83,24 +105,24 @@
   <div class="stat-chip">
     <i class="bi bi-calendar3"></i>
     <div>
-      <div class="stat-n">{{ turnosProximos.length }}</div>
-      <div class="stat-l">Próximos</div>
+      <div class="stat-n">{{ franjasHoy.length }}</div>
+      <div class="stat-l">Franjas</div>
     </div>
   </div>
 </div>
 
-<!-- PRÓXIMOS TURNOS -->
-@if (turnosProximos.length > 0) {
-<div class="seccion-titulo">Próximos turnos</div>
+<!-- TODOS LOS TURNOS DE HOY -->
+@if (turnosHoy.length > 1) {
+<div class="seccion-titulo">Mis turnos de hoy</div>
 <div class="turnos-lista">
-  @for (t of turnosProximos; track t.id) {
-  <div class="turno-row">
-    <div class="turno-row-fecha">{{ t.fecha }}</div>
+  @for (t of turnosHoy; track t.id) {
+  <div class="turno-row" [class.turno-row-activo]="t.id === turnoActivo?.id">
+    <div class="turno-row-fecha">{{ t.horaInicio }}</div>
     <div class="turno-row-info">
       <strong>{{ t.zona?.nombre }}</strong>
       <small>{{ t.horaInicio }} – {{ t.horaFin }} · {{ t.tipoFranja }}</small>
     </div>
-    <span class="estado-badge" [class]="estadoClass(t.estado)">{{ t.estado }}</span>
+    <span class="estado-badge" [class]="t.estado | estadoTurno:'class'">{{ t.estado | estadoTurno }}</span>
   </div>
   }
 </div>

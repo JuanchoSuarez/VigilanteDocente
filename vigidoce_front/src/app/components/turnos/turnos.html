@@ -9,8 +9,10 @@
 </div>
 
 @if (loading) {
-<div class="dark-loading">
-  <div class="ring"></div><span>Cargando...</span>
+<div class="card-list">
+  <div class="skeleton skeleton-card" style="height: 80px;"></div>
+  <div class="skeleton skeleton-card" style="height: 80px;"></div>
+  <div class="skeleton skeleton-card" style="height: 80px;"></div>
 </div>
 } @else {
 <div class="card-list">
@@ -26,8 +28,7 @@
       <div class="item-sub">
         <span class="chip chip-blue">{{ t.zona?.nombre }}</span>
         &nbsp;{{ t.fecha }} · {{ t.horaInicio }}–{{ t.horaFin }}
-        &nbsp;<span class="chip" [class.chip-green]="t.estado==='EN_CURSO'" [class.chip-amber]="t.estado==='PENDIENTE'"
-          [class.chip-gray]="t.estado==='CERRADO'" [class.chip-red]="t.estado==='AUSENTE'">{{ t.estado }}</span>
+        &nbsp;<span class="chip" [class]="t.estado | estadoTurno:'class'">{{ t.estado | estadoTurno }}</span>
       </div>
     </div>
     <div class="item-actions">

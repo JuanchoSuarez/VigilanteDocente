@@ -1,18 +1,23 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { forkJoin, Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { ApiService } from '../../services/api.service';
+import { CatalogosService } from '../../services/catalogos.service';
+import { ToastService } from '../../services/toast.service';
 import { Turno, EstadoTurno, TipoFranja } from '../../models/turno.model';
 import { Docente } from '../../models/docente.model';
 import { Zona } from '../../models/zona.model';
+import { EstadoTurnoPipe } from '../../pipes/estado.pipe';
 
 @Component({
   selector: 'app-turnos',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, EstadoTurnoPipe],
   templateUrl: './turnos.html',
   styleUrl: './turnos.css'
 })
-export class TurnosComponent implements OnInit {
+export class TurnosComponent implements OnInit, OnDestroy {
   turnos: Turno[] = [];
   docentes: Docente[] = [];
   zonas: Zona[] = [];
@@ -23,8 +28,15 @@ export class TurnosComponent implements OnInit {
   estados = Object.values(EstadoTurno);
   franjas = Object.values(TipoFranja);
   fechaHoy = new Date().toISOString().split('T')[0];
+  
+  private destroy$ = new Subject<void>();
 
-  constructor(private api: ApiService, private fb: FormBuilder) {
+  constructor(
+    private api: ApiService, 
+    private fb: FormBuilder,
+    private catalogos: CatalogosService,
+    private toast: ToastService
+  ) {
     this.form = this.fb.group({
       docente: [null, Validators.required],
       zona: [null, Validators.required],
@@ -38,15 +50,29 @@ export class TurnosComponent implements OnInit {
 
   ngOnInit(): void {
     this.cargar();
-    this.api.getAll<Docente>('docentes').subscribe(d => this.docentes = d.filter(x => x.activo));
-    this.api.getAll<Zona>('zonas').subscribe(z => this.zonas = z.filter(x => x.activa));
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   cargar(): void {
     this.loading = true;
-    this.api.getAll<Turno>('turnos').subscribe({
-      next: t => { this.turnos = t; this.loading = false; },
-      error: () => { this.loading = false; }
+    forkJoin({
+      turnos: this.api.getAll<Turno>('turnos'),
+      docentes: this.catalogos.getDocentes(),
+      zonas: this.catalogos.getZonas()
+    }).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (data) => {
+        this.turnos = data.turnos;
+        this.docentes = data.docentes.filter(x => x.activo);
+        this.zonas = data.zonas.filter(x => x.activa);
+        this.loading = false;
+      },
+      error: () => {
+        this.loading = false;
+      }
     });
   }
 
@@ -77,25 +103,24 @@ export class TurnosComponent implements OnInit {
 
     if (this.editId) {
       this.api.put<Turno>('turnos', this.editId, payload).subscribe(() => {
-        this.showModal = false; this.cargar();
+        this.showModal = false; 
+        this.toast.success('Turno editado');
+        this.cargar();
       });
     } else {
       this.api.post<Turno>('turnos', payload).subscribe(() => {
-        this.showModal = false; this.cargar();
+        this.showModal = false; 
+        this.toast.success('Turno creado');
+        this.cargar();
       });
     }
   }
 
   eliminar(id: number): void {
     if (!confirm('¿Eliminar este turno?')) return;
-    this.api.delete('turnos', id).subscribe(() => this.cargar());
-  }
-
-  estadoClass(estado: EstadoTurno): string {
-    const map: Record<string, string> = {
-      EN_CURSO: 'badge bg-success', PENDIENTE: 'badge bg-warning text-dark',
-      CERRADO: 'badge bg-secondary', AUSENTE: 'badge bg-danger'
-    };
-    return map[estado] ?? 'badge bg-secondary';
+    this.api.delete('turnos', id).subscribe(() => {
+      this.toast.success('Turno eliminado');
+      this.cargar();
+    });
   }
 }

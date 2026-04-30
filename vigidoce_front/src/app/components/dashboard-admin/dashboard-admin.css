@@ -1,9 +1,10 @@
 :host {
-  --primary: #818CF8;
-  --primary-dim: rgba(129, 140, 248, 0.12);
-  --surface: #14112a;
-  --text: rgba(255, 255, 255, 0.85);
-  --text-muted: rgba(255, 255, 255, 0.4);
+  --primary: #d8b4fe;
+  --primary-dark: #6a1b9a;
+  --primary-dim: rgba(106, 27, 154, 0.22);
+  --surface: #1c1c30;
+  --text: rgba(255, 255, 255, 0.88);
+  --text-muted: rgba(255, 255, 255, 0.42);
   display: block;
   color: var(--text);
 }
@@ -77,13 +78,17 @@
 
 .adm-stat {
   background: var(--surface);
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(106, 27, 154, 0.18);
   border-radius: 16px;
   padding: 0.875rem;
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,.15);
+  transition: border-color .2s;
 }
+
+.adm-stat:hover { border-color: rgba(106,27,154,.35); }
 
 .adm-stat-icon {
   width: 36px;
@@ -120,7 +125,7 @@
 /* ── MAPA EDITOR ─────────────────────────── */
 .mapa-editor-card {
   background: var(--surface);
-  border: 1px solid rgba(129, 140, 248, 0.15);
+  border: 1px solid rgba(106, 27, 154, 0.18);
   border-radius: 18px;
   overflow: hidden;
 }

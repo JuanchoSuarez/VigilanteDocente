@@ -11,7 +11,7 @@ export const routes: Routes = [
   // ─── DOCENTE ───────────────────────────────────────────────
   {
     path: 'docente',
-    loadComponent: () => import('./components/layout/layout').then(m => m.LayoutComponent),
+    loadComponent: () => import('./components/docente-layout/docente-layout').then(m => m.DocenteLayoutComponent),
     canActivate: [authGuard],
     data: { rol: 'DOCENTE' },
     children: [

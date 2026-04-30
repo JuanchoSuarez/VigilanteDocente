@@ -19,8 +19,9 @@
 </div>
 
 @if (loading) {
-<div class="dark-loading">
-  <div class="ring"></div><span>Cargando...</span>
+<div class="card-list">
+  <div class="skeleton skeleton-card" style="height: 100px;"></div>
+  <div class="skeleton skeleton-card" style="height: 100px;"></div>
 </div>
 } @else {
 <div class="card-list">
@@ -34,9 +35,7 @@
     <div class="item-body">
       <div class="item-title">{{ i.zona?.nombre }} — {{ i.tipo }}</div>
       <div class="item-sub">
-        <span class="chip" [class.chip-red]="i.severidad==='S3_ATENCION_INMEDIATA'"
-          [class.chip-amber]="i.severidad==='S2_SEGUIMIENTO'" [class.chip-green]="i.severidad==='S1_LEVE'">{{
-          i.severidad }}</span>
+        <span class="chip" [class]="i.severidad | severidadIncidente:'class'">{{ i.severidad | severidadIncidente }}</span>
         &nbsp;· {{ i.fechaHora | slice:0:16 }}
       </div>
       <div class="item-desc">{{ i.descripcion }}</div>

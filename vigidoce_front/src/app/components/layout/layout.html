@@ -9,8 +9,11 @@
   <aside class="sidebar">
     <div class="sidebar-header">
       <div class="sidebar-brand">
-        <i class="bi bi-shield-check"></i>
-        <span>VigiDoc</span>
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2 5 5v5c0 5 3 8.5 7 10 4-1.5 7-5 7-10V5z"/>
+          <path d="m8.5 12 2.5 2.5L16 9.5"/>
+        </svg>
+        <span>Vigi<strong>Docente</strong></span>
       </div>
       <button class="btn-close-sidebar" (click)="toggleSidebar()">
         <i class="bi bi-x-lg"></i>
@@ -18,25 +21,15 @@
     </div>
 
     <div class="sidebar-user">
-      <div class="avatar-pill" [class]="rolClass">{{ iniciales }}</div>
+      <div class="avatar-pill" [class]="usuario?.rol | rolDocente:'class'">{{ iniciales }}</div>
       <div>
         <div class="user-name">{{ usuario?.nombre }} {{ usuario?.apellido }}</div>
-        <div class="user-role">{{ rolLabel }}</div>
+        <div class="user-role">{{ usuario?.rol | rolDocente }}</div>
       </div>
     </div>
 
     <nav class="sidebar-nav">
-      @if (isDocente) {
-      <a routerLink="/docente/dashboard" routerLinkActive="active" class="nav-item" (click)="toggleSidebar()">
-        <i class="bi bi-speedometer2"></i><span>Dashboard</span>
-      </a>
-      <a routerLink="/docente/turnos" routerLinkActive="active" class="nav-item" (click)="toggleSidebar()">
-        <i class="bi bi-calendar-check"></i><span>Mis Turnos</span>
-      </a>
-      <a routerLink="/docente/incidentes" routerLinkActive="active" class="nav-item" (click)="toggleSidebar()">
-        <i class="bi bi-exclamation-triangle"></i><span>Mis Incidentes</span>
-      </a>
-      }
+
       @if (isCoordinador) {
       <a routerLink="/coordinador/dashboard" routerLinkActive="active" class="nav-item" (click)="toggleSidebar()">
         <i class="bi bi-speedometer2"></i><span>Dashboard</span>
@@ -93,15 +86,18 @@
         <i class="bi bi-list"></i>
       </button>
       <div class="top-bar-brand">
-        <i class="bi bi-shield-check"></i>
-        <span>VigiDoc</span>
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2 5 5v5c0 5 3 8.5 7 10 4-1.5 7-5 7-10V5z"/>
+          <path d="m8.5 12 2.5 2.5L16 9.5"/>
+        </svg>
+        <span>Vigi<strong>Docente</strong></span>
       </div>
       <div class="top-bar-right">
         <div class="hora-pill">
           <i class="bi bi-clock"></i>
           {{ horaActual }}
         </div>
-        <div class="avatar-sm" [class]="rolClass">{{ iniciales }}</div>
+        <div class="avatar-sm" [class]="usuario?.rol | rolDocente:'class'">{{ iniciales }}</div>
       </div>
     </header>
 
@@ -110,20 +106,7 @@
       <router-outlet></router-outlet>
     </main>
 
-    <!-- BOTTOM NAV POR ROL -->
-    @if (isDocente) {
-    <nav class="bottom-nav bottom-nav-docente">
-      <a routerLink="/docente/dashboard" routerLinkActive="bnav-active" class="bnav-item">
-        <i class="bi bi-house-fill"></i><span>Inicio</span>
-      </a>
-      <a routerLink="/docente/turnos" routerLinkActive="bnav-active" class="bnav-item">
-        <i class="bi bi-calendar-check-fill"></i><span>Turnos</span>
-      </a>
-      <a routerLink="/docente/incidentes" routerLinkActive="bnav-active" class="bnav-item">
-        <i class="bi bi-exclamation-triangle-fill"></i><span>Incidentes</span>
-      </a>
-    </nav>
-    }
+
 
     @if (isCoordinador) {
     <nav class="bottom-nav bottom-nav-coord">

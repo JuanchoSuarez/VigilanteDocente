@@ -122,11 +122,32 @@ body {
 
 /* ═══ DARK THEME GLOBAL OVERRIDES ═══════════════════════════ */
 
-/* Fix selects y inputs dentro de modal-sheet */
+/* Fix selects e inputs: forzar dark theme nativo y opciones legibles */
 .f-select,
 .f-input,
 .f-textarea {
   color-scheme: dark;
+}
+
+/* Fondo oscuro en el panel desplegable de todos los <select> del proyecto */
+.f-select option,
+.form-select option,
+.reg-select option,
+select option {
+  background-color: #1e1e2e;
+  color: #e0e0e0;
+}
+
+/* Fallback de color explícito por si el browser ignora color-scheme */
+.f-select {
+  background-color: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.form-select {
+  background-color: #1e1e2e;
+  color: #e0e0e0;
+  border-color: rgba(255, 255, 255, 0.15);
 }
 
 /* Scrollbar dark */
@@ -136,18 +157,6 @@ body {
 
 ::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.1);
-}
-
-/* ── BOTTOM NAV FIJA siempre visible ─────────────────────── */
-.bottom-nav {
-  position: sticky;
-  bottom: 0;
-  z-index: 50;
-}
-
-/* Quitar padding-bottom del phone-screen para que el nav no quede cortado */
-.phone-screen {
-  overflow: hidden;
 }
 
 .main-content {
@@ -209,17 +218,47 @@ body {
   flex-direction: column;
 }
 
-.phone-notch {
+/* ── PHONE STATUS BAR (reemplaza el notch absoluto) ─────── */
+.phone-status-bar {
+  height: 44px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.1rem;
+  position: relative;
+  z-index: 9999;
+  background: transparent;
+}
+
+.psb-time {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: rgba(255,255,255,.9);
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+  min-width: 36px;
+}
+
+.phone-notch-pill {
   position: absolute;
-  top: 10px;
+  top: 50%;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translate(-50%, -50%);
   width: 120px;
   height: 30px;
   background: #0d1117;
   border-radius: 20px;
-  z-index: 9999;
   box-shadow: 0 0 0 1px rgba(255,255,255,.06);
+  pointer-events: none;
+}
+
+.psb-icons {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: rgba(255,255,255,.9);
+  font-size: 0.8rem;
 }
 
 .phone-screen {
@@ -227,6 +266,16 @@ body {
   overflow: hidden;
   border-radius: 38px;
   position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+app-root {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .phone-home-bar {
@@ -245,7 +294,7 @@ body {
     border-radius: 0;
     box-shadow: none;
   }
-  .phone-notch { display: none; }
+  .phone-status-bar { display: none; }
   .phone-home-bar { display: none; }
   .phone-screen { border-radius: 0; }
 }

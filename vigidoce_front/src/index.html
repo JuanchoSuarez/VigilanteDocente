@@ -44,8 +44,17 @@
 <body>
   <div class="phone-shell-wrapper">
     <div class="phone-shell">
-      <!-- Notch (Dynamic Island style) -->
-      <div class="phone-notch"></div>
+
+      <!-- Status bar: hora | notch pill | señal/wifi/batería -->
+      <div class="phone-status-bar">
+        <span class="psb-time" id="psb-clock">9:41</span>
+        <div class="phone-notch-pill"></div>
+        <div class="psb-icons">
+          <i class="bi bi-reception-4"></i>
+          <i class="bi bi-wifi"></i>
+          <i class="bi bi-battery-full"></i>
+        </div>
+      </div>
 
       <!-- App content -->
       <div class="phone-screen">
@@ -56,6 +65,19 @@
       <div class="phone-home-bar"></div>
     </div>
   </div>
+
+  <script>
+    (function () {
+      function tick() {
+        var el = document.getElementById('psb-clock');
+        if (!el) return;
+        var now = new Date();
+        el.textContent = now.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
+      }
+      tick();
+      setInterval(tick, 1000);
+    })();
+  </script>
 </body>
 
 </html>

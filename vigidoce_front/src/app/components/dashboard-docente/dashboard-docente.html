@@ -1,12 +1,21 @@
+<!-- M7: Toast de todos los turnos completados -->
+@if (showTodosCompletados) {
+<div class="gamificacion-toast">
+  <span class="gam-icon">🔥</span>
+  <div>
+    <strong>¡Todos los turnos completados!</strong>
+    <small>Racha: {{ rachaActual }} día{{ rachaActual !== 1 ? 's' : '' }}</small>
+  </div>
+</div>
+}
+
 <!-- HEADER -->
 <div class="doc-header">
   <div>
     <p class="doc-saludo">{{ saludo }}</p>
-    <h2 class="doc-nombre"><strong>{{ usuario?.nombre }}</strong> <span class="text-accent">{{ usuario?.apellido
-        }}</span></h2>
+    <h2 class="doc-nombre"><strong>{{ usuario?.nombre }}</strong> <span class="text-accent">{{ usuario?.apellido }}</span></h2>
   </div>
-  <div class="estado-pill" [class.estado-activo]="turnoActivo?.estado === 'EN_CURSO'"
-    [class.estado-libre]="!turnoActivo">
+  <div class="estado-pill" [class.estado-activo]="turnoActivo?.estado === 'EN_CURSO'" [class.estado-libre]="!turnoActivo">
     <span class="estado-dot"></span>
     {{ turnoActivo ? (turnoActivo.estado === 'EN_CURSO' ? 'En turno' : 'Pendiente') : 'Libre' }}
   </div>
@@ -23,66 +32,142 @@
 }
 
 @if (!loading) {
-<!-- TURNO ACTIVO -->
-@if (turnoActivo) {
-<div class="turno-card">
+
+<!-- ── TURNO ACTIVO (EN_CURSO) ─────────────────────────────────── -->
+@if (turnoActivo && turnoActivo.estado === 'EN_CURSO') {
+<div class="turno-card" [class.checkin-success]="checkinSuccess">
+  @if (checkinSuccess) {
+  <div class="checkin-success-overlay">
+    <i class="bi bi-check-circle-fill"></i>
+  </div>
+  }
   <div class="turno-card-top">
     <div>
       <div class="turno-etiqueta">TURNO ACTIVO</div>
       <div class="turno-zona">{{ turnoActivo.zona.nombre }}</div>
       <div class="turno-meta">
         <i class="bi bi-clock"></i> {{ turnoActivo.horaInicio }} – {{ turnoActivo.horaFin }}
-        &nbsp;·&nbsp;
-        <i class="bi bi-flag"></i> {{ turnoActivo.tipoFranja }}
+        &nbsp;·&nbsp;<i class="bi bi-flag"></i> {{ turnoActivo.tipoFranja }}
       </div>
     </div>
-    <div class="semaforo" [class.sem-verde]="turnoActivo.estado === 'EN_CURSO'"
-      [class.sem-amarillo]="turnoActivo.estado === 'PENDIENTE'">
-      <i class="bi" [class.bi-check-circle-fill]="turnoActivo.estado === 'EN_CURSO'"
-        [class.bi-hourglass-split]="turnoActivo.estado === 'PENDIENTE'"></i>
+    <div class="semaforo sem-verde">
+      <i class="bi bi-check-circle-fill"></i>
     </div>
   </div>
 
-  <!-- 3 ACCIONES GRANDES -->
-  @if (turnoActivo.estado === 'EN_CURSO') {
-    <div class="acciones-grid">
-      <button class="accion-btn accion-checkin" (click)="abrirCheckin()">
-        <i class="bi bi-geo-alt-fill"></i>
-        <span>Check-in</span>
-      </button>
-      <button class="accion-btn accion-incidente" (click)="abrirIncidente()">
-        <i class="bi bi-exclamation-triangle-fill"></i>
-        <span>Incidente</span>
-      </button>
-      <button class="accion-btn accion-reas" (click)="abrirReasignacion()">
-        <i class="bi bi-person-dash-fill"></i>
-        <span>No puedo</span>
-      </button>
-    </div>
+  <!-- F4: Estado de check-in y rondas siempre visible en la card -->
+  <div class="turno-status-row">
+    <span class="turno-status-item" [class.status-ok]="checkinRealizado">
+      @if (checkinRealizado) {
+        <i class="bi bi-check-circle-fill"></i> Llegada: {{ checkinHora }}
+      } @else {
+        <i class="bi bi-circle"></i> Check-in: Pendiente
+      }
+    </span>
+    <span class="turno-status-item">
+      <i class="bi bi-arrow-repeat"></i> Rondas: {{ rondasHoy }}
+    </span>
+  </div>
+
+  <!-- F4: Botón de check-in prominente (ancho completo, mín 52px) -->
+  @if (!checkinRealizado) {
+  <button class="btn-checkin-prominente" (click)="abrirCheckin()">
+    <i class="bi bi-check-circle-fill me-2"></i>✓ Confirmar llegada
+  </button>
   } @else {
-    <div class="turno-pendiente-alert">
-      <i class="bi bi-clock"></i>
-      <span>Tu turno comenzará a las {{ turnoActivo.horaInicio }}. Prepárate para el check-in.</span>
-      <button class="btn btn-sm btn-outline-light ms-2" (click)="abrirCheckin()">Hacer Check-in anticipado</button>
-    </div>
+  <button class="btn-checkin-prominente btn-checkin-done" disabled>
+    <i class="bi bi-check-circle-fill me-2"></i>✓ Llegada registrada {{ checkinHora }}
+  </button>
+  <!-- F4: Botón de ronda QR: aparece tras el check-in -->
+  <button class="btn-ronda" (click)="abrirRonda()">
+    <i class="bi bi-qr-code me-2"></i>📷 Registrar ronda
+  </button>
   }
+
+  <!-- Acciones secundarias: incidente y reasignación -->
+  <div class="acciones-grid" style="margin-top:0.5rem">
+    <button class="accion-btn accion-incidente" (click)="abrirIncidente()">
+      <i class="bi bi-exclamation-triangle-fill"></i><span>Incidente</span>
+    </button>
+    <button class="accion-btn accion-reas" (click)="abrirReasignacion()">
+      <i class="bi bi-person-dash-fill"></i><span>No puedo</span>
+    </button>
+  </div>
 </div>
-} @else {
+}
+
+<!-- ── M1: PRETURNO (PENDIENTE ≤ 10 min) ─────────────────────────── -->
+@else if (turnoActivo && esModoPreturno) {
+<div class="preturno-card" [class.checkin-success]="checkinSuccess">
+  @if (checkinSuccess) {
+  <div class="checkin-success-overlay">
+    <i class="bi bi-check-circle-fill"></i>
+  </div>
+  }
+  <div class="preturno-top">
+    <div>
+      <div class="preturno-etiqueta">PRÓXIMO TURNO</div>
+      <div class="preturno-zona">{{ turnoActivo.zona.nombre }}</div>
+      <div class="preturno-meta">
+        <i class="bi bi-clock"></i> {{ turnoActivo.horaInicio }} – {{ turnoActivo.horaFin }}
+        &nbsp;·&nbsp; {{ turnoActivo.tipoFranja }}
+      </div>
+    </div>
+    <div class="preturno-semaforo">
+      <i class="bi bi-hourglass-split"></i>
+    </div>
+  </div>
+  <div class="preturno-countdown">
+    <span class="countdown-label">Faltan</span>
+    <span class="countdown-value">{{ cuentaRegresivaTexto }}</span>
+  </div>
+  <button class="btn-checkin-full" (click)="abrirCheckin()">
+    <i class="bi bi-check-circle-fill me-2"></i>Hacer Check-in ahora
+  </button>
+</div>
+}
+
+<!-- ── PENDIENTE > 10 min ──────────────────────────────────────── -->
+@else if (turnoActivo && turnoActivo.estado === 'PENDIENTE') {
+<div class="turno-card">
+  <div class="turno-card-top">
+    <div>
+      <div class="turno-etiqueta">TURNO ASIGNADO</div>
+      <div class="turno-zona">{{ turnoActivo.zona.nombre }}</div>
+      <div class="turno-meta">
+        <i class="bi bi-clock"></i> {{ turnoActivo.horaInicio }} – {{ turnoActivo.horaFin }}
+        &nbsp;·&nbsp;<i class="bi bi-flag"></i> {{ turnoActivo.tipoFranja }}
+      </div>
+    </div>
+    <div class="semaforo sem-amarillo">
+      <i class="bi bi-hourglass-split"></i>
+    </div>
+  </div>
+  <div class="turno-pendiente-alert">
+    <i class="bi bi-clock"></i>
+    <span>Tu turno comenzará a las {{ turnoActivo.horaInicio }}. Prepárate para el check-in.</span>
+    <button class="btn btn-sm btn-outline-light ms-2" (click)="abrirCheckin()">Check-in anticipado</button>
+  </div>
+</div>
+}
+
+<!-- ── SIN TURNO ──────────────────────────────────────────────── -->
+@else {
   @if (franjasHoy.length > 0 && turnosHoy.length === 0) {
-    <div class="sin-turno-card">
-      <i class="bi bi-clock-history"></i>
-      <p>El administrador aún no generó los turnos de hoy</p>
-    </div>
+  <div class="sin-turno-card">
+    <i class="bi bi-clock-history"></i>
+    <p>El administrador aún no generó los turnos de hoy</p>
+  </div>
   } @else if (turnosHoy.length > 0) {
-    <div class="sin-turno-card" style="background: linear-gradient(135deg, rgba(52, 211, 153, 0.1), rgba(0, 137, 123, 0.2)); border: 1px solid rgba(52, 211, 153, 0.3);">
-      <i class="bi bi-stars" style="color: #34d399"></i>
-      <p>Has completado tus turnos de hoy. ¡Buen trabajo!</p>
-    </div>
+  <div class="sin-turno-card" style="background:linear-gradient(135deg,rgba(52,211,153,0.1),rgba(0,137,123,0.2));border:1px solid rgba(52,211,153,0.3)">
+    <i class="bi bi-stars" style="color:#34d399"></i>
+    <p>Has completado tus turnos de hoy. ¡Buen trabajo!</p>
+  </div>
   } @else {
-    <div class="sin-turno-card">
-      <i class="bi bi-moon-stars-fill"></i>
-      <p>No tienes turnos asignados hoy</p>
-    </div>
+  <div class="sin-turno-card">
+    <i class="bi bi-moon-stars-fill"></i>
+    <p>No tienes turnos asignados hoy</p>
+  </div>
   }
 }
 
@@ -91,7 +176,12 @@
   <div class="stat-chip">
     <i class="bi bi-calendar-check"></i>
     <div>
-      <div class="stat-n">{{ turnosHoy.length }}</div>
+      <div class="stat-n">
+        {{ turnosHoy.length }}
+        @if (rachaActual > 1) {
+        <span class="racha-badge">🔥{{ rachaActual }}</span>
+        }
+      </div>
       <div class="stat-l">Hoy</div>
     </div>
   </div>
@@ -102,16 +192,17 @@
       <div class="stat-l">Incidentes</div>
     </div>
   </div>
+  <!-- F4: Contador de rondas del día -->
   <div class="stat-chip">
-    <i class="bi bi-calendar3"></i>
+    <i class="bi bi-arrow-repeat"></i>
     <div>
-      <div class="stat-n">{{ franjasHoy.length }}</div>
-      <div class="stat-l">Franjas</div>
+      <div class="stat-n">{{ rondasHoy }}</div>
+      <div class="stat-l">Rondas</div>
     </div>
   </div>
 </div>
 
-<!-- TODOS LOS TURNOS DE HOY -->
+<!-- LISTA DE TURNOS DEL DÍA -->
 @if (turnosHoy.length > 1) {
 <div class="seccion-titulo">Mis turnos de hoy</div>
 <div class="turnos-lista">
@@ -127,38 +218,50 @@
   }
 </div>
 }
-}
 
-<!-- MODAL CHECK-IN -->
+} <!-- end !loading -->
+
+<!-- ── M2: MODAL CHECK-IN ────────────────────────────────────────── -->
 @if (showCheckinModal) {
 <div class="modal-backdrop-custom" (click)="showCheckinModal = false"></div>
 <div class="modal-sheet">
   <div class="sheet-handle"></div>
   <h5 class="sheet-title"><i class="bi bi-geo-alt-fill me-2"></i>Registrar Check-in</h5>
 
+  <!-- Paso 1: selector de método (solo si no hay guardado) -->
   @if (checkinPaso === 1) {
   <p class="sheet-sub">¿Cómo quieres registrarte?</p>
   <div class="metodo-grid">
     @for (m of metodos; track m.value) {
     <button class="metodo-card" (click)="seleccionarMetodo(m.value)">
-      <i class="bi {{m.icon}}"></i>
+      <i class="bi {{ m.icon }}"></i>
       <strong>{{ m.label }}</strong>
       <small>{{ m.desc }}</small>
     </button>
     }
   </div>
+  <button class="btn-sheet-sec mt-2" (click)="showCheckinModal = false">Cancelar</button>
   }
 
+  <!-- Paso 2: confirmación (directo si había método guardado) -->
   @if (checkinPaso === 2) {
+  <div class="confirm-method-card">
+    <i class="bi {{ iconMetodoGuardado }}"></i>
+    <div>
+      <strong>{{ labelMetodoGuardado }}</strong>
+      <small>Método de registro</small>
+    </div>
+  </div>
+
+  @if (metodoSeleccionado === 'PIN') {
+  <p class="sheet-sub">PIN de 4 dígitos:</p>
+  <input type="text" maxlength="4" [(ngModel)]="pinInput" class="pin-input" placeholder="0000" />
+  }
   @if (metodoSeleccionado === 'QR') {
   <div class="qr-area">
     <i class="bi bi-qr-code"></i>
     <p>Código QR simulado de la zona</p>
   </div>
-  }
-  @if (metodoSeleccionado === 'PIN') {
-  <p class="sheet-sub">PIN de 4 dígitos:</p>
-  <input type="text" maxlength="4" [(ngModel)]="pinInput" class="pin-input" placeholder="0000" />
   }
   @if (metodoSeleccionado === 'NFC') {
   <div class="qr-area">
@@ -166,60 +269,56 @@
     <p>Acerca el dispositivo al lector NFC...</p>
   </div>
   }
-  <div class="sheet-actions">
-    <button class="btn-sheet-sec" (click)="checkinPaso = 1">Volver</button>
-    <button class="btn-sheet-pri" (click)="confirmarCheckin()">Confirmar</button>
-  </div>
-  }
 
-  @if (checkinPaso === 1) {
-  <button class="btn-sheet-sec mt-2" (click)="showCheckinModal = false">Cancelar</button>
+  <button class="cambiar-metodo-link" (click)="cambiarMetodo()">
+    <i class="bi bi-arrow-left me-1"></i>Cambiar método
+  </button>
+
+  <div class="sheet-actions">
+    <button class="btn-sheet-sec" (click)="showCheckinModal = false">Cancelar</button>
+    <button class="btn-sheet-pri" (click)="confirmarCheckin()">
+      <i class="bi bi-check-lg me-1"></i>Confirmar
+    </button>
+  </div>
   }
 </div>
 }
 
-<!-- MODAL INCIDENTE -->
+<!-- ── M5: MODAL INCIDENTE (2 PASOS) ────────────────────────────── -->
 @if (showIncidenteModal) {
 <div class="modal-backdrop-custom" (click)="showIncidenteModal = false"></div>
 <div class="modal-sheet">
   <div class="sheet-handle"></div>
   <div class="progress-bar-wrap">
-    <div class="progress-bar-fill" [style.width]="(incidentePaso / 3 * 100) + '%'"></div>
+    <div class="progress-bar-fill" [style.width]="(incidentePaso / 2 * 100) + '%'"></div>
   </div>
-  <h5 class="sheet-title"><i class="bi bi-exclamation-triangle-fill me-2"></i>Paso {{ incidentePaso }} de 3</h5>
+  <h5 class="sheet-title">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i>Paso {{ incidentePaso }} de 2
+  </h5>
 
+  <!-- Paso 1: cuadrícula tipo + severidad combinados -->
   @if (incidentePaso === 1) {
-  <p class="sheet-sub">¿Qué tipo de incidente?</p>
-  <div class="tipo-grid">
-    @for (t of tipos; track t.value) {
-    <button class="tipo-card" [class.selected]="tipoIncidente === t.value" (click)="seleccionarTipo(t.value)"
-      [style.--t-color]="t.color">
-      <i class="bi {{t.icon}}" [style.color]="t.color"></i>
-      <strong>{{ t.label }}</strong>
+  <p class="sheet-sub">¿Qué ocurrió?</p>
+  <div class="combo-grid">
+    @for (c of combos; track c.icon) {
+    <button class="combo-btn"
+      [style.background]="c.bg"
+      [style.color]="c.color"
+      [style.border-color]="c.border"
+      (click)="seleccionarCombo(c)">
+      <i class="bi {{ c.icon }}"></i>
+      <strong>{{ c.label }}</strong>
+      <small>{{ c.sublabel }}</small>
     </button>
     }
   </div>
+  <button class="btn-sheet-sec mt-2" (click)="showIncidenteModal = false">Cancelar</button>
   }
 
+  <!-- Paso 2: descripción + enviar -->
   @if (incidentePaso === 2) {
-  <p class="sheet-sub">Nivel de severidad:</p>
-  <div class="sev-lista">
-    @for (s of severidades; track s.value) {
-    <button class="sev-card" [class.selected]="severidadIncidente === s.value" (click)="seleccionarSeveridad(s.value)"
-      [style.--s-color]="s.color">
-      <i class="bi-circle-fill" [style.color]="s.color"></i>
-      <div>
-        <strong [style.color]="s.color">{{ s.label }}</strong>
-        <p>{{ s.desc }}</p>
-      </div>
-    </button>
-    }
-  </div>
-  }
-
-  @if (incidentePaso === 3) {
   <div class="form-group">
-    <label>Descripción *</label>
+    <label>Descripción <span class="opcional">(opcional)</span></label>
     <textarea [(ngModel)]="descripcionIncidente" placeholder="Describe lo ocurrido..." rows="3"></textarea>
   </div>
   <div class="form-group">
@@ -227,29 +326,42 @@
     <input [(ngModel)]="observacionEstudiante" type="text" placeholder="Curso, nombre..." />
   </div>
   <div class="sheet-actions">
-    <button class="btn-sheet-sec" (click)="incidentePaso = 2">Volver</button>
-    <button class="btn-sheet-danger" [disabled]="!descripcionIncidente.trim()" (click)="confirmarIncidente()">
-      <i class="bi bi-send me-1"></i>Enviar
+    <button class="btn-sheet-sec" (click)="incidentePaso = 1">
+      <i class="bi bi-arrow-left me-1"></i>Cambiar
+    </button>
+    <button class="btn-sheet-danger" (click)="confirmarIncidente()">
+      <i class="bi bi-send me-1"></i>Enviar reporte
     </button>
   </div>
   }
-
-  @if (incidentePaso < 3) { <div class="sheet-actions">
-    @if (incidentePaso > 1) {
-    <button class="btn-sheet-sec" (click)="incidentePaso = incidentePaso - 1">Volver</button>
-    }
-    <button class="btn-sheet-sec" (click)="showIncidenteModal = false">Cancelar</button>
-</div>
-}
 </div>
 }
 
-<!-- MODAL REASIGNACIÓN -->
+<!-- ── M9: MODAL REASIGNACIÓN ────────────────────────────────────── -->
 @if (showReasignacionModal) {
 <div class="modal-backdrop-custom" (click)="showReasignacionModal = false"></div>
 <div class="modal-sheet">
   <div class="sheet-handle"></div>
   <h5 class="sheet-title"><i class="bi bi-person-dash-fill me-2"></i>Solicitar Reasignación</h5>
+
+  <!-- M9: Contexto del turno -->
+  @if (turnoActivo) {
+  <div class="turno-ctx">
+    <div class="turno-ctx-row">
+      <span class="ctx-lbl">Zona</span>
+      <span class="ctx-val">{{ turnoActivo.zona.nombre }}</span>
+    </div>
+    <div class="turno-ctx-row">
+      <span class="ctx-lbl">Turno</span>
+      <span class="ctx-val">{{ turnoActivo.horaInicio }} → {{ turnoActivo.horaFin }}</span>
+    </div>
+    <div class="turno-ctx-row">
+      <span class="ctx-lbl">Franja</span>
+      <span class="ctx-val">{{ turnoActivo.tipoFranja }}</span>
+    </div>
+  </div>
+  }
+
   <div class="alerta-warn">
     <i class="bi bi-exclamation-triangle-fill"></i>
     Tu turno quedará <strong>PENDIENTE</strong> hasta que el coordinador asigne un reemplazo.

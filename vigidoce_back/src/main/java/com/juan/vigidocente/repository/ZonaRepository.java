@@ -31,4 +31,8 @@ public interface ZonaRepository extends JpaRepository<Zona, Long> {
     // Conteo de turnos por zona (para analítica)
     @Query("SELECT z.nombre, COUNT(t) FROM Zona z LEFT JOIN z.turnos t GROUP BY z.id, z.nombre")
     List<Object[]> countTurnosPorZona();
+
+    // Verificar si una zona tiene turnos asociados antes de eliminar
+    @Query("SELECT COUNT(t) FROM Turno t WHERE t.zona.id = :zonaId")
+    long countTurnosByZonaId(@Param("zonaId") Long zonaId);
 }

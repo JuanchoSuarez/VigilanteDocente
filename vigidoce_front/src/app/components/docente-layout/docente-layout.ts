@@ -22,18 +22,39 @@ export class DocenteLayoutComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.usuario = this.auth.getUsuarioActual();
-    this.api.getCustom<{hora: string, fecha: string}>('servidor/fecha-hora').subscribe(data => {
-      // Usar la hora del servidor
-      const parts = data.hora.split(':');
-      const d = new Date();
-      d.setHours(+parts[0], +parts[1], +parts[2] || 0);
-      this.actualizarHora(d);
-      
-      this.intervalo = setInterval(() => {
-        d.setSeconds(d.getSeconds() + 1);
+    this.aplicarRolAlBody();
+    // Mostrar hora local de inmediato; luego sincronizar con servidor
+    this.iniciarRelojLocal();
+
+    this.api.getCustom<{hora: string, fecha: string}>('servidor/fecha-hora').subscribe({
+      next: (data) => {
+        if (this.intervalo) clearInterval(this.intervalo);
+        const parts = data.hora.split(':');
+        const d = new Date();
+        d.setHours(+parts[0], +parts[1], +parts[2] || 0);
         this.actualizarHora(d);
-      }, 1000);
+        this.intervalo = setInterval(() => {
+          d.setSeconds(d.getSeconds() + 1);
+          this.actualizarHora(d);
+        }, 1000);
+      },
+      error: () => { /* ya corre reloj local */ }
     });
+  }
+
+  private iniciarRelojLocal(): void {
+    this.actualizarHoraLocal();
+    this.intervalo = setInterval(() => this.actualizarHoraLocal(), 1000);
+  }
+
+  private actualizarHoraLocal(): void {
+    this.horaActual = new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  }
+
+  private aplicarRolAlBody(): void {
+    const body = document.body;
+    body.classList.remove('rol-docente', 'rol-coordinador', 'rol-admin');
+    body.classList.add('rol-docente');
   }
 
   ngOnDestroy(): void {

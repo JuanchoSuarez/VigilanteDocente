@@ -51,12 +51,14 @@
   <div class="login-card animate-slide-up" style="animation-delay:0.08s">
     <div class="login-card-sheen"></div>
 
-    <!-- Tabs -->
+    <!-- Tabs (ocultos en vista de registro) -->
+    @if (tab !== 'register') {
     <div class="login-tabs">
       <button class="login-tab" [class.tab-active]="tab === 'login'" (click)="tab = 'login'">Ingresar</button>
-      <button class="login-tab" [class.tab-active]="tab === 'info'" (click)="tab = 'info'">Información</button>
+      <button class="login-tab" [class.tab-active]="tab === 'info'"  (click)="tab = 'info'">Información</button>
       <div class="tab-indicator" [class.tab-right]="tab === 'info'"></div>
     </div>
+    }
 
     @if (tab === 'login') {
       @if (error) {
@@ -132,6 +134,125 @@
           </button>
         </div>
       </div>
+
+      <button type="button" class="btn-crear-cuenta" (click)="tab = 'register'">
+        ¿No tienes cuenta? <strong>Crear una</strong> <i class="bi bi-arrow-right"></i>
+      </button>
+    }
+
+    <!-- ── FORMULARIO DE REGISTRO ─────────────────────────── -->
+    @if (tab === 'register') {
+      <div class="reg-header">
+        <div class="reg-title">Crear cuenta</div>
+        <div class="reg-sub">Regístrate para acceder al sistema</div>
+      </div>
+
+      @if (regError) {
+        <div class="login-error animate-fade-in">
+          <i class="bi bi-exclamation-triangle-fill"></i>
+          <span>{{ regError }}</span>
+        </div>
+      }
+
+      <form [formGroup]="regForm" (ngSubmit)="registrar()" class="login-form">
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div class="field-group">
+            <div class="field-label">Nombre *</div>
+            <div class="input-wrap" [class.focused]="regFocused === 'nombre'">
+              <i class="bi bi-person field-icon"></i>
+              <input type="text" class="field-input" formControlName="nombre"
+                     placeholder="Juan"
+                     (focus)="regFocused = 'nombre'" (blur)="regFocused = null"/>
+            </div>
+            @if (regForm.get('nombre')?.invalid && regForm.get('nombre')?.touched) {
+              <div class="field-error">Requerido</div>
+            }
+          </div>
+          <div class="field-group">
+            <div class="field-label">Apellido *</div>
+            <div class="input-wrap" [class.focused]="regFocused === 'apellido'">
+              <i class="bi bi-person field-icon"></i>
+              <input type="text" class="field-input" formControlName="apellido"
+                     placeholder="Pérez"
+                     (focus)="regFocused = 'apellido'" (blur)="regFocused = null"/>
+            </div>
+            @if (regForm.get('apellido')?.invalid && regForm.get('apellido')?.touched) {
+              <div class="field-error">Requerido</div>
+            }
+          </div>
+        </div>
+
+        <div class="field-group">
+          <div class="field-label">Correo institucional *</div>
+          <div class="input-wrap" [class.focused]="regFocused === 'remail'">
+            <i class="bi bi-envelope field-icon"></i>
+            <input type="email" class="field-input" formControlName="email"
+                   placeholder="nombre@colegio.edu.co"
+                   (focus)="regFocused = 'remail'" (blur)="regFocused = null"/>
+          </div>
+          @if (regForm.get('email')?.invalid && regForm.get('email')?.touched) {
+            <div class="field-error">Ingresa un email válido</div>
+          }
+        </div>
+
+        <div class="field-group">
+          <div class="field-label">Contraseña *</div>
+          <div class="input-wrap" [class.focused]="regFocused === 'rpass'">
+            <i class="bi bi-lock field-icon"></i>
+            <input [type]="regShowPass ? 'text' : 'password'" class="field-input"
+                   formControlName="password" placeholder="Mínimo 4 caracteres"
+                   (focus)="regFocused = 'rpass'" (blur)="regFocused = null"/>
+            <button type="button" class="eye-btn" (click)="regShowPass = !regShowPass">
+              <i class="bi" [class.bi-eye]="!regShowPass" [class.bi-eye-slash]="regShowPass"></i>
+            </button>
+          </div>
+          @if (regForm.get('password')?.invalid && regForm.get('password')?.touched) {
+            <div class="field-error">Mínimo 4 caracteres</div>
+          }
+        </div>
+
+        <div class="field-group">
+          <div class="field-label">Confirmar contraseña *</div>
+          <div class="input-wrap" [class.focused]="regFocused === 'rconfirm'"
+               [class.input-error]="mismatch">
+            <i class="bi bi-lock-fill field-icon"></i>
+            <input type="password" class="field-input"
+                   formControlName="confirmPassword" placeholder="Repite la contraseña"
+                   (focus)="regFocused = 'rconfirm'" (blur)="regFocused = null"/>
+          </div>
+          @if (mismatch) {
+            <div class="field-error">Las contraseñas no coinciden</div>
+          }
+        </div>
+
+        <div class="field-group">
+          <div class="field-label">Rol *</div>
+          <div class="input-wrap" [class.focused]="regFocused === 'rrol'" style="height:auto;padding:0 14px">
+            <i class="bi bi-person-badge field-icon"></i>
+            <select class="field-input reg-select" formControlName="rol"
+                    (focus)="regFocused = 'rrol'" (blur)="regFocused = null">
+              @for (r of ROLES; track r.value) {
+                <option [value]="r.value">{{ r.label }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-login" [disabled]="regLoading || regForm.invalid">
+          @if (regLoading) {
+            <span class="spinner-border spinner-border-sm"></span>
+            <span>Creando cuenta...</span>
+          } @else {
+            <i class="bi bi-person-plus-fill"></i>
+            <span>Crear cuenta</span>
+          }
+        </button>
+      </form>
+
+      <button type="button" class="btn-volver-login" (click)="tab = 'login'">
+        <i class="bi bi-arrow-left me-1"></i>¿Ya tienes cuenta? Inicia sesión
+      </button>
     }
 
     @if (tab === 'info') {

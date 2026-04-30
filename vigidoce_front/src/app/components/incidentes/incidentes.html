@@ -100,10 +100,14 @@
         </div>
       </div>
     </div>
-    <div class="f-group">
-      <label class="f-label">Fecha y hora *</label>
-      <input type="datetime-local" class="f-input" formControlName="fechaHora" />
-    </div>
+    <details class="f-group" style="cursor:pointer">
+      <summary class="f-label" style="list-style:none;display:flex;align-items:center;gap:0.4rem">
+        <i class="bi bi-clock" style="font-size:0.75rem"></i>
+        Fecha y hora
+        <span style="font-weight:400;color:rgba(255,255,255,.35);font-size:0.68rem">(auto · editar si es corrección)</span>
+      </summary>
+      <input type="datetime-local" class="f-input" style="margin-top:0.4rem" formControlName="fechaHora" />
+    </details>
     <div class="f-group">
       <label class="f-label">Descripción *</label>
       <textarea class="f-textarea" formControlName="descripcion" rows="3"

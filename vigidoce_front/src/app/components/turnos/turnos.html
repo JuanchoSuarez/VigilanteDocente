@@ -51,27 +51,9 @@
   <p class="sheet-title"><i class="bi bi-calendar-check me-2"></i>{{ editId ? 'Editar' : 'Nuevo' }} Turno</p>
 
   <form [formGroup]="form" (ngSubmit)="guardar()">
-    <!-- AUTO: docente desde sesión (solo visible en crear, no en editar manual) -->
-    <div class="auto-section-title"><i class="bi bi-lock-fill"></i> Completado automáticamente</div>
-    <div class="auto-block">
-      <div class="auto-block-label">Docente</div>
-      <div class="auto-block-value">
-        @if (docentes.length > 0) {
-        Selecciona abajo
-        }
-      </div>
-    </div>
-    <div class="auto-block">
-      <div class="auto-block-label">Fecha</div>
-      <div class="auto-block-value">{{ fechaHoy }}</div>
-    </div>
-    <div class="auto-block">
-      <div class="auto-block-label">Hora inicio · Hora fin</div>
-      <div class="auto-block-value">Según configuración del administrador</div>
-    </div>
 
-    <div class="auto-section-title"><i class="bi bi-pencil"></i> Completa tú</div>
-
+    <!-- Selector de docente: visible para Admin/Coord; read-only para rol Docente -->
+    @if (!esDocente) {
     <div class="f-group">
       <label class="f-label">Docente *</label>
       <div class="f-select-wrap">
@@ -83,6 +65,15 @@
         </select>
       </div>
     </div>
+    } @else {
+    <div class="f-group">
+      <label class="f-label">Docente</label>
+      <div class="docente-readonly">
+        <i class="bi bi-person-check-fill"></i>
+        {{ usuarioSesion?.nombre }} {{ usuarioSesion?.apellido }}
+      </div>
+    </div>
+    }
 
     <div class="f-group">
       <label class="f-label">Zona *</label>
@@ -121,6 +112,7 @@
       </div>
     </div>
 
+    @if (editId) {
     <div class="f-group">
       <label class="f-label">Estado *</label>
       <div class="f-select-wrap">
@@ -129,11 +121,12 @@
         </select>
       </div>
     </div>
+    }
 
     <div class="sheet-actions">
       <button type="button" class="btn-sheet-sec" (click)="showModal = false">Cancelar</button>
       <button type="submit" class="btn-sheet-pri" [disabled]="form.invalid">
-        <i class="bi bi-floppy me-1"></i>Guardar
+        <i class="bi bi-floppy me-1"></i>{{ editId ? 'Guardar' : 'Crear Turno' }}
       </button>
     </div>
   </form>

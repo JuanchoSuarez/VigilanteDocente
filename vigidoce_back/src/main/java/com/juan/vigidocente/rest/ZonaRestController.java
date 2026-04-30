@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/zonas")
@@ -46,9 +47,13 @@ public class ZonaRestController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
+    public ResponseEntity<?> eliminar(@PathVariable Long id) {
         zonaService.buscarPorId(id);
-        zonaService.eliminar(id);
-        return ResponseEntity.noContent().build();
+        try {
+            zonaService.eliminar(id);
+            return ResponseEntity.noContent().build();
+        } catch (DatosInvalidosException e) {
+            return ResponseEntity.status(409).body(Map.of("mensaje", e.getMessage()));
+        }
     }
 }

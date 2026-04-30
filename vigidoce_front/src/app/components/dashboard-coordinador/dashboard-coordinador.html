@@ -5,13 +5,39 @@
     <h2 class="coord-title">Control en Vivo</h2>
     <p class="coord-date">{{ hoy }}</p>
   </div>
-  @if (turnosConProblema.length > 0) {
-    <div class="alerta-badge">
-      <i class="bi bi-alarm-fill"></i>
-      {{ turnosConProblema.length }}
-    </div>
-  }
+  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:0.3rem">
+    @if (turnosConProblema.length > 0) {
+      <div class="alerta-badge">
+        <i class="bi bi-alarm-fill"></i>
+        {{ turnosConProblema.length }}
+      </div>
+    }
+    <!-- M4: indicador de última actualización -->
+    @if (ultimaActualizacionLabel) {
+      <div class="indicador-actualizacion">
+        @if (cargandoSilencioso) {
+          <span class="dot-pulse"></span>
+        } @else {
+          <i class="bi bi-arrow-clockwise"></i>
+        }
+        {{ cargandoSilencioso ? 'Actualizando…' : ultimaActualizacionLabel }}
+      </div>
+    }
+  </div>
 </div>
+
+<!-- M8: BANNER DE EMERGENCIA -->
+@if (zonasConProblema.length > 0) {
+  <div class="banner-emergencia">
+    <div class="banner-emergencia-content">
+      <i class="bi bi-exclamation-triangle-fill"></i>
+      <span><strong>{{ zonasConProblema.length }}</strong> zona{{ zonasConProblema.length !== 1 ? 's' : '' }} sin cobertura</span>
+    </div>
+    <button class="btn-emergencia-asignar" (click)="abrirReasignarEmergencia(zonasConProblema[0])">
+      Asignar ahora
+    </button>
+  </div>
+}
 
 <!-- ALERTA URGENTE -->
 @if (turnosConProblema.length > 0) {

@@ -285,7 +285,7 @@
 
 /* ── MODAL SHEET ─────────────────────────────── */
 .modal-backdrop-custom {
-  position: fixed;
+  position: absolute;
   inset: 0;
   background: rgba(0, 0, 0, 0.7);
   z-index: 400;
@@ -293,7 +293,7 @@
 }
 
 .modal-sheet {
-  position: fixed;
+  position: absolute;
   bottom: 0;
   left: 0;
   right: 0;

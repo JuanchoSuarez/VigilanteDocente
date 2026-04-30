@@ -371,3 +371,275 @@ input[type="range"]#zonaHeat {
   border-color: rgba(129, 140, 248, 0.2);
   color: white;
 }
+
+/* ── ZONA WIDGET ───────────────────────────────────────── */
+.adm-stat-zonas {
+  cursor: pointer;
+  transition: border-color .2s, background .2s;
+}
+.adm-stat-zonas:hover {
+  border-color: rgba(34,211,238,0.4);
+  background: rgba(34,211,238,0.05);
+}
+
+.zona-widget {
+  background: var(--surface, #1c1c30);
+  border: 1px solid rgba(129,140,248,0.15);
+  border-radius: 18px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.zona-widget-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.btn-zona-add {
+  display: flex;
+  align-items: center;
+  padding: 0.35rem 0.875rem;
+  background: rgba(129,140,248,0.15);
+  border: 1px solid rgba(129,140,248,0.3);
+  border-radius: 20px;
+  color: var(--primary, #d8b4fe);
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .15s;
+  font-family: inherit;
+}
+.btn-zona-add:hover { background: rgba(129,140,248,0.25); }
+
+.zona-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  min-height: 52px;
+}
+.zona-row:last-child { border-bottom: none; }
+
+.zona-row-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.zona-row-nombre {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: rgba(255,255,255,.88);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.zona-row-desc {
+  font-size: 0.68rem;
+  color: rgba(255,255,255,.38);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 1px;
+}
+
+.zona-badge {
+  font-size: 0.62rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+.badge-activa  { background:rgba(0,200,100,0.12); color:#00c864; }
+.badge-inactiva { background:rgba(255,255,255,0.07); color:rgba(255,255,255,.4); }
+
+.zona-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex-shrink: 0;
+}
+
+.zona-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,.1);
+  display: grid;
+  place-items: center;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all .15s;
+}
+
+.zona-btn-edit {
+  background: rgba(129,140,248,.1);
+  color: #818CF8;
+}
+.zona-btn-edit:hover { background: rgba(129,140,248,.25); }
+
+.zona-btn-del {
+  background: rgba(239,68,68,.1);
+  color: #F87171;
+}
+.zona-btn-del:hover { background: rgba(239,68,68,.22); }
+
+.zona-confirm-text {
+  font-size: 0.7rem;
+  color: #fca5a5;
+  font-weight: 600;
+}
+
+.zona-btn-danger-sm {
+  padding: 3px 8px;
+  width: auto;
+  height: auto;
+  background: rgba(239,68,68,.2);
+  border: 1px solid rgba(239,68,68,.4);
+  color: #fca5a5;
+  font-size: 0.72rem;
+  font-weight: 700;
+  border-radius: 6px;
+}
+
+.zona-btn-sec-sm {
+  padding: 3px 8px;
+  width: auto;
+  height: auto;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.1);
+  color: rgba(255,255,255,.55);
+  font-size: 0.72rem;
+  font-weight: 600;
+  border-radius: 6px;
+}
+
+.zona-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 1.5rem;
+  color: rgba(255,255,255,.2);
+  font-size: 0.8rem;
+}
+.zona-empty i { font-size: 1.5rem; }
+
+/* ── Modal sheet y form reutilizados del tema admin ─────── */
+.modal-backdrop-custom {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 400;
+  backdrop-filter: blur(3px);
+}
+
+.modal-sheet {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  border-radius: 24px 24px 0 0;
+  padding: 0.75rem 1.125rem 1.5rem;
+  z-index: 500;
+  max-height: 90%;
+  overflow-y: auto;
+  box-shadow: 0 -20px 60px rgba(0,0,0,.45);
+}
+
+.sheet-handle {
+  width: 36px;
+  height: 4px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 2px;
+  margin: 0 auto 1rem;
+}
+
+.sheet-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 0.875rem;
+}
+
+.sheet-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.btn-sheet-pri {
+  flex: 1;
+  padding: 0.75rem;
+  border: none;
+  border-radius: 14px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.15s;
+  color: white;
+}
+
+.btn-sheet-sec {
+  flex: 1;
+  padding: 0.75rem;
+  background: rgba(255,255,255,0.07);
+  color: rgba(255,255,255,0.6);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 14px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.f-group { margin-bottom: 0.75rem; }
+
+.f-label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: rgba(255,255,255,.55);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.4rem;
+}
+
+.f-input, .f-textarea {
+  width: 100%;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 12px;
+  color: white;
+  font-size: 0.85rem;
+  padding: 0.625rem 0.875rem;
+  outline: none;
+  font-family: inherit;
+  transition: border-color .15s;
+  color-scheme: dark;
+}
+
+.f-input:focus, .f-textarea:focus {
+  border-color: rgba(129,140,248,.5);
+}
+
+.f-select-wrap { position: relative; }
+
+.f-select {
+  width: 100%;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 12px;
+  color: white;
+  font-size: 0.85rem;
+  padding: 0.625rem 0.875rem;
+  outline: none;
+  appearance: none;
+  font-family: inherit;
+  color-scheme: dark;
+}

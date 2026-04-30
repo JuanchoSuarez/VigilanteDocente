@@ -285,7 +285,7 @@
 
 /* ── MODAL SHEET ─────────────────────────────── */
 .modal-backdrop-custom {
-    position: fixed;
+    position: absolute;
     inset: 0;
     background: rgba(0, 0, 0, 0.7);
     z-index: 400;
@@ -293,7 +293,7 @@
 }
 
 .modal-sheet {
-    position: fixed;
+    position: absolute;
     bottom: 0;
     left: 0;
     right: 0;
@@ -378,6 +378,21 @@
     color: rgba(255, 255, 255, 0.45);
     margin-bottom: 0.35rem;
 }
+
+/* Campo read-only que reemplaza el selector cuando el usuario es Docente */
+.docente-readonly {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 0.875rem;
+    background: rgba(52, 211, 153, 0.07);
+    border: 1px solid rgba(52, 211, 153, 0.2);
+    border-radius: 12px;
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+.docente-readonly i { color: #34d399; }
 
 .f-input,
 .f-select {

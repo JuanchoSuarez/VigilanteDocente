@@ -1,5 +1,6 @@
 package com.juan.vigidocente.service;
 
+import com.juan.vigidocente.exception.DatosInvalidosException;
 import com.juan.vigidocente.model.TipoZona;
 import com.juan.vigidocente.model.Zona;
 import com.juan.vigidocente.repository.ZonaRepository;
@@ -30,6 +31,10 @@ public class ZonaService {
 
     @Transactional
     public void eliminar(Long id) {
+        if (zonaRepository.countTurnosByZonaId(id) > 0) {
+            throw new DatosInvalidosException(
+                "No se puede eliminar: esta zona tiene turnos activos asociados");
+        }
         zonaRepository.deleteById(id);
     }
 

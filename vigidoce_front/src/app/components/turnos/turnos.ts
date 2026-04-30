@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { forkJoin, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { ApiService } from '../../services/api.service';
+import { AuthService } from '../../services/auth.service';
 import { CatalogosService } from '../../services/catalogos.service';
 import { ToastService } from '../../services/toast.service';
 import { Turno, EstadoTurno, TipoFranja } from '../../models/turno.model';
@@ -28,14 +29,21 @@ export class TurnosComponent implements OnInit, OnDestroy {
   estados = Object.values(EstadoTurno);
   franjas = Object.values(TipoFranja);
   fechaHoy = new Date().toISOString().split('T')[0];
-  
+
+  /** Docente autenticado en la sesión actual */
+  usuarioSesion: Docente | null = null;
+
+  /** True cuando el usuario en sesión tiene rol DOCENTE */
+  get esDocente(): boolean { return this.usuarioSesion?.rol === 'DOCENTE'; }
+
   private destroy$ = new Subject<void>();
 
   constructor(
-    private api: ApiService, 
+    private api: ApiService,
     private fb: FormBuilder,
     private catalogos: CatalogosService,
-    private toast: ToastService
+    private toast: ToastService,
+    private auth: AuthService
   ) {
     this.form = this.fb.group({
       docente: [null, Validators.required],
@@ -48,7 +56,9 @@ export class TurnosComponent implements OnInit, OnDestroy {
     });
   }
 
+  // Inicializa la sesión del usuario y carga los datos al montar el componente
   ngOnInit(): void {
+    this.usuarioSesion = this.auth.getUsuarioActual();
     this.cargar();
   }
 
@@ -76,9 +86,15 @@ export class TurnosComponent implements OnInit, OnDestroy {
     });
   }
 
+  // Abre el modal en modo creación; si el usuario es DOCENTE, pre-rellena su propio ID
   abrirCrear(): void {
     this.editId = null;
-    this.form.reset({ estado: EstadoTurno.PENDIENTE, tipoFranja: TipoFranja.RECREO });
+    this.form.reset({
+      estado: EstadoTurno.PENDIENTE,
+      tipoFranja: TipoFranja.RECREO,
+      fecha: this.fechaHoy,
+      docente: this.esDocente ? this.usuarioSesion?.id : null
+    });
     this.showModal = true;
   }
 

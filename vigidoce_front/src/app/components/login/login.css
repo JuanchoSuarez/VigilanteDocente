@@ -457,6 +457,87 @@
   line-height: 1.5;
 }
 
+/* ── CREAR CUENTA LINK ── */
+.btn-crear-cuenta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  margin-top: 14px;
+  padding: 10px;
+  background: rgba(52,211,153,.08);
+  border: 1px dashed rgba(52,211,153,.3);
+  border-radius: 10px;
+  color: rgba(255,255,255,.65);
+  font-size: 13px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all .2s;
+}
+.btn-crear-cuenta:hover {
+  background: rgba(52,211,153,.14);
+  color: rgba(255,255,255,.9);
+  border-color: rgba(52,211,153,.5);
+}
+.btn-crear-cuenta strong { color: #34d399; }
+
+/* ── REGISTRO ── */
+.reg-header {
+  margin-bottom: 16px;
+  text-align: center;
+}
+.reg-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: #fff;
+}
+.reg-sub {
+  font-size: 12px;
+  color: rgba(255,255,255,.45);
+  margin-top: 3px;
+}
+
+.reg-select {
+  height: 44px;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #fff;
+  font-size: 14px;
+  font-family: inherit;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.reg-select option {
+  background: #1a2744;
+  color: #fff;
+}
+
+.input-error {
+  border-color: rgba(239,68,68,.55) !important;
+  box-shadow: 0 0 0 3px rgba(239,68,68,.15) !important;
+}
+
+.btn-volver-login {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin-top: 14px;
+  padding: 8px;
+  background: none;
+  border: none;
+  color: rgba(255,255,255,.45);
+  font-size: 13px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: color .2s;
+}
+.btn-volver-login:hover { color: rgba(255,255,255,.8); }
+
 /* ── FOOTER ── */
 .login-footer {
   display: flex;

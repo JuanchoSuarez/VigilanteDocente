@@ -1,12 +1,13 @@
 import { Component, OnInit, AfterViewInit, OnDestroy, ViewChild, ElementRef, HostListener } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { forkJoin, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { ApiService } from '../../services/api.service';
 import { CatalogosService } from '../../services/catalogos.service';
 import { ToastService } from '../../services/toast.service';
 import { Docente } from '../../models/docente.model';
-import { Zona } from '../../models/zona.model';
+import { Zona, TipoZona } from '../../models/zona.model';
 import { Turno } from '../../models/turno.model';
 import { Incidente } from '../../models/incidente.model';
 
@@ -15,7 +16,7 @@ interface ZonaRect { id: number; x: number; y: number; w: number; h: number; nom
 @Component({
   selector: 'app-dashboard-admin',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, ReactiveFormsModule],
   templateUrl: './dashboard-admin.html',
   styleUrl: './dashboard-admin.css'
 })
@@ -28,7 +29,16 @@ export class DashboardAdminComponent implements OnInit, AfterViewInit, OnDestroy
   incidentesMes = 0;
   loading = false;
   generandoTurnos = false;
-  
+
+  // ── CRUD Zonas ───────────────────────────────────────────────
+  zonasList: Zona[] = [];
+  showZonaModal = false;
+  zonaEditId: number | null = null;
+  zonaForm: FormGroup;
+  zonaError = '';
+  zonaAEliminar: Zona | null = null;
+  readonly tiposZona = Object.values(TipoZona);
+
   private destroy$ = new Subject<void>();
 
   // Canvas State
@@ -44,8 +54,17 @@ export class DashboardAdminComponent implements OnInit, AfterViewInit, OnDestroy
   constructor(
     private api: ApiService,
     private catalogos: CatalogosService,
-    private toast: ToastService
-  ) {}
+    private toast: ToastService,
+    private fb: FormBuilder
+  ) {
+    this.zonaForm = this.fb.group({
+      nombre:         ['', Validators.required],
+      descripcion:    [''],
+      tipo:           [TipoZona.PATIO, Validators.required],
+      capacidadMaxima: [50, [Validators.required, Validators.min(1)]],
+      activa:         [true]
+    });
+  }
 
   ngOnInit(): void {
     this.loading = true;
@@ -74,6 +93,7 @@ export class DashboardAdminComponent implements OnInit, AfterViewInit, OnDestroy
       next: (data) => {
         this.totalDocentes = data.docentes.filter(x => x.activo).length;
         this.totalZonas = data.zonas.filter(x => x.activa).length;
+        this.zonasList = data.zonas;
         this.turnosHoy = data.turnos.length;
         this.incidentesMes = data.incidentes.filter(x => x.fechaHora?.startsWith(mesActual)).length;
         
@@ -226,35 +246,41 @@ export class DashboardAdminComponent implements OnInit, AfterViewInit, OnDestroy
       }
     };
 
+    // Botón papelera: limpia TODAS las zonas Y la imagen de fondo
     btnDelete.onclick = () => {
-      if (this.selectedId === null) return;
-      const idx = this.zonasRects.findIndex(z => z.id === this.selectedId);
-      if (idx !== -1) { this.zonasRects.splice(idx, 1); this.selectedId = null; zonaPanel.style.display = 'none'; }
-      this.renderZonasGuardadas(zonasGuardadas);
-      this.redraw();
-    };
-
-    btnClear.onclick = () => {
       this.zonasRects.length = 0;
       this.selectedId = null;
+      this.bgImage = null;
       zonaPanel.style.display = 'none';
-      if (this.zonasRects.length === 0) hint.style.display = 'flex';
+      hint.style.display = 'flex';
       this.renderZonasGuardadas(zonasGuardadas);
       this.redraw();
     };
 
+    // Botón ✕: cancela la selección actual y cierra el panel sin borrar nada
+    btnClear.onclick = () => {
+      this.selectedId = null;
+      zonaPanel.style.display = 'none';
+    };
+
+    // Botón imagen: abre el selector de archivos del sistema
     btnSelectImg.onclick = () => imgInput.click();
+
+    // Al seleccionar imagen: lee con FileReader como DataURL y dibuja con proporciones cover
     imgInput.onchange = () => {
       const file = imgInput.files?.[0];
       if (!file) return;
-      const url = URL.createObjectURL(file);
-      const img = new Image();
-      img.onload = () => {
-        this.bgImage = img;
-        hint.style.display = 'none';
-        this.resizeCanvas();
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const img = new Image();
+        img.onload = () => {
+          this.bgImage = img;
+          hint.style.display = 'none';
+          this.resizeCanvas();
+        };
+        img.src = ev.target?.result as string;
       };
-      img.src = url;
+      reader.readAsDataURL(file);
     };
   }
 
@@ -278,6 +304,18 @@ export class DashboardAdminComponent implements OnInit, AfterViewInit, OnDestroy
     return `rgba(255,60,60,${alpha})`;
   }
 
+  // Dibuja la imagen de fondo con escalado object-fit: cover (mantiene proporciones)
+  private drawBgImage(ctx: CanvasRenderingContext2D, w: number, h: number): void {
+    if (!this.bgImage) return;
+    const scale = Math.max(w / this.bgImage.width, h / this.bgImage.height);
+    const dw = this.bgImage.width * scale;
+    const dh = this.bgImage.height * scale;
+    const dx = (w - dw) / 2;
+    const dy = (h - dh) / 2;
+    ctx.drawImage(this.bgImage, dx, dy, dw, dh);
+  }
+
+  // Redibuja el canvas: capa 1 imagen de fondo, capa 2 zonas con etiquetas
   private redraw() {
     if (!this.canvasRef) return;
     const canvas = this.canvasRef.nativeElement;
@@ -289,7 +327,7 @@ export class DashboardAdminComponent implements OnInit, AfterViewInit, OnDestroy
     ctx.clearRect(0, 0, w, h);
 
     if (this.bgImage) {
-      ctx.drawImage(this.bgImage, 0, 0, w, h);
+      this.drawBgImage(ctx, w, h);
     }
 
     this.zonasRects.forEach(z => {
@@ -355,6 +393,75 @@ export class DashboardAdminComponent implements OnInit, AfterViewInit, OnDestroy
         this.generandoTurnos = false;
         this.toast.error('Error al generar turnos automáticamente.');
       }
+    });
+  }
+
+  // ── CRUD Zonas ───────────────────────────────────────────────
+  abrirCrearZona(): void {
+    this.zonaEditId = null;
+    this.zonaError = '';
+    this.zonaForm.reset({ tipo: TipoZona.PATIO, capacidadMaxima: 50, activa: true });
+    this.showZonaModal = true;
+  }
+
+  abrirEditarZona(z: Zona): void {
+    this.zonaEditId = z.id ?? null;
+    this.zonaError = '';
+    this.zonaForm.patchValue(z);
+    this.showZonaModal = true;
+  }
+
+  guardarZona(): void {
+    if (this.zonaForm.invalid) return;
+    this.zonaError = '';
+    const payload = this.zonaForm.value;
+
+    const op = this.zonaEditId
+      ? this.api.put<Zona>('zonas', this.zonaEditId, payload)
+      : this.api.post<Zona>('zonas', payload);
+
+    op.subscribe({
+      next: () => {
+        this.showZonaModal = false;
+        this.toast.success(this.zonaEditId ? 'Zona actualizada' : 'Zona creada');
+        this.catalogos.invalidarZonas();
+        this.recargarZonas();
+      },
+      error: (err) => {
+        this.zonaError = err?.error?.mensaje ?? 'Error al guardar la zona.';
+      }
+    });
+  }
+
+  confirmarEliminarZona(z: Zona): void {
+    this.zonaAEliminar = z;
+  }
+
+  cancelarEliminar(): void {
+    this.zonaAEliminar = null;
+  }
+
+  eliminarZona(z: Zona): void {
+    if (!z.id) return;
+    this.api.delete('zonas', z.id).subscribe({
+      next: () => {
+        this.zonaAEliminar = null;
+        this.toast.success('Zona eliminada');
+        this.catalogos.invalidarZonas();
+        this.recargarZonas();
+      },
+      error: (err) => {
+        this.zonaAEliminar = null;
+        const msg = err?.error?.mensaje ?? 'No se puede eliminar esta zona.';
+        this.toast.error(msg);
+      }
+    });
+  }
+
+  private recargarZonas(): void {
+    this.catalogos.getZonas().subscribe(zonas => {
+      this.zonasList = zonas;
+      this.totalZonas = zonas.filter(z => z.activa).length;
     });
   }
 }

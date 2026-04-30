@@ -28,12 +28,12 @@
     <div class="adm-stat-n">{{ totalDocentes }}</div>
     <div class="adm-stat-l">Docentes activos</div>
   </div>
-  <div class="adm-stat">
+  <div class="adm-stat adm-stat-zonas" (click)="abrirCrearZona()" title="Gestionar zonas">
     <div class="adm-stat-icon" style="background:rgba(34,211,238,0.15); color:#22D3EE">
       <i class="bi bi-map-fill"></i>
     </div>
     <div class="adm-stat-n">{{ totalZonas }}</div>
-    <div class="adm-stat-l">Zonas activas</div>
+    <div class="adm-stat-l">Zonas activas <i class="bi bi-plus-circle" style="font-size:0.7rem;margin-left:4px;opacity:0.6"></i></div>
   </div>
   <div class="adm-stat">
     <div class="adm-stat-icon" style="background:rgba(251,191,36,0.15); color:#FBBF24">
@@ -49,6 +49,51 @@
     <div class="adm-stat-n">{{ incidentesMes }}</div>
     <div class="adm-stat-l">Incidentes mes</div>
   </div>
+</div>
+
+<!-- ── GESTOR DE ZONAS ──────────────────────────────── -->
+<div class="zona-widget">
+  <div class="zona-widget-header">
+    <span class="seccion-titulo" style="margin:0">Zonas <span style="opacity:.5">({{ zonasList.length }})</span></span>
+    <button class="btn-zona-add" (click)="abrirCrearZona()">
+      <i class="bi bi-plus-lg me-1"></i>Nueva Zona
+    </button>
+  </div>
+
+  @if (zonasList.length === 0 && !loading) {
+    <div class="zona-empty">
+      <i class="bi bi-map"></i>
+      <p>No hay zonas registradas</p>
+    </div>
+  }
+
+  @for (z of zonasList; track z.id) {
+  <div class="zona-row">
+    <div class="zona-row-info">
+      <span class="zona-row-nombre">{{ z.nombre }}</span>
+      @if (z.descripcion) {
+        <span class="zona-row-desc">{{ z.descripcion }}</span>
+      }
+    </div>
+    <span class="zona-badge" [class.badge-activa]="z.activa" [class.badge-inactiva]="!z.activa">
+      {{ z.activa ? 'Activa' : 'Inactiva' }}
+    </span>
+    <div class="zona-row-actions">
+      @if (zonaAEliminar?.id === z.id) {
+        <span class="zona-confirm-text">¿Eliminar?</span>
+        <button class="zona-btn zona-btn-danger-sm" (click)="eliminarZona(z)">Sí</button>
+        <button class="zona-btn zona-btn-sec-sm" (click)="cancelarEliminar()">No</button>
+      } @else {
+        <button class="zona-btn zona-btn-edit" (click)="abrirEditarZona(z)" title="Editar">
+          <i class="bi bi-pencil"></i>
+        </button>
+        <button class="zona-btn zona-btn-del" (click)="confirmarEliminarZona(z)" title="Eliminar">
+          <i class="bi bi-trash3"></i>
+        </button>
+      }
+    </div>
+  </div>
+  }
 </div>
 
 <!-- EDITOR DE MAPA DE CALOR -->
@@ -144,5 +189,79 @@
     <i class="bi bi-magic me-2"></i>
     @if (generandoTurnos) { Generando... } @else { Generar Turnos Diarios Automáticamente }
   </button>
+</div>
+}
+
+<!-- ── MODAL CREAR / EDITAR ZONA ────────────────────────── -->
+@if (showZonaModal) {
+<div class="modal-backdrop-custom" (click)="showZonaModal = false"></div>
+<div class="modal-sheet" style="background:#1c1c30;border-color:rgba(129,140,248,0.2)">
+  <div class="sheet-handle"></div>
+  <p class="sheet-title">
+    <i class="bi bi-map me-2"></i>
+    {{ zonaEditId ? 'Editar Zona' : 'Nueva Zona' }}
+  </p>
+
+  @if (zonaError) {
+    <div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:10px;
+                color:#fca5a5;font-size:12.5px;padding:8px 12px;margin-bottom:12px;display:flex;gap:8px">
+      <i class="bi bi-exclamation-triangle-fill"></i>{{ zonaError }}
+    </div>
+  }
+
+  <form [formGroup]="zonaForm" (ngSubmit)="guardarZona()">
+    <div class="f-group">
+      <label class="f-label">Nombre de la zona *</label>
+      <input type="text" class="f-input" formControlName="nombre"
+             placeholder="Ej: Patio principal, Cafetería…" />
+      @if (zonaForm.get('nombre')?.invalid && zonaForm.get('nombre')?.touched) {
+        <div style="font-size:11.5px;color:#fca5a5;margin-top:4px">El nombre es requerido</div>
+      }
+    </div>
+
+    <div class="f-group">
+      <label class="f-label">Descripción <span style="font-weight:400;opacity:.5">(opcional)</span></label>
+      <textarea class="f-textarea" formControlName="descripcion"
+                placeholder="Breve descripción de la zona…" rows="2"
+                maxlength="200"></textarea>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem">
+      <div class="f-group">
+        <label class="f-label">Tipo *</label>
+        <div class="f-select-wrap">
+          <select class="f-select" formControlName="tipo">
+            @for (t of tiposZona; track t) {
+              <option [value]="t">{{ t }}</option>
+            }
+          </select>
+        </div>
+      </div>
+      <div class="f-group">
+        <label class="f-label">Capacidad est.</label>
+        <input type="number" class="f-input" formControlName="capacidadMaxima"
+               placeholder="50" min="1" />
+      </div>
+    </div>
+
+    @if (zonaEditId) {
+    <div class="f-group" style="display:flex;align-items:center;gap:0.75rem">
+      <label class="f-label" style="margin:0">Estado</label>
+      <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;font-size:0.85rem;color:rgba(255,255,255,.7)">
+        <input type="checkbox" formControlName="activa" />
+        Zona activa
+      </label>
+    </div>
+    }
+
+    <div class="sheet-actions">
+      <button type="button" class="btn-sheet-sec" (click)="showZonaModal = false">Cancelar</button>
+      <button type="submit" class="btn-sheet-pri" [disabled]="zonaForm.invalid"
+              style="background:linear-gradient(160deg,#818CF8,#6366F1)">
+        <i class="bi bi-floppy me-1"></i>
+        {{ zonaEditId ? 'Guardar' : 'Crear Zona' }}
+      </button>
+    </div>
+  </form>
 </div>
 }

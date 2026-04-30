@@ -4,11 +4,13 @@ import { SlicePipe } from '@angular/common';
 import { forkJoin, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { ApiService } from '../../services/api.service';
+import { AuthService } from '../../services/auth.service';
 import { CatalogosService } from '../../services/catalogos.service';
 import { ToastService } from '../../services/toast.service';
 import { Incidente, TipoIncidente, SeveridadIncidente } from '../../models/incidente.model';
 import { Turno } from '../../models/turno.model';
 import { Zona } from '../../models/zona.model';
+import { Docente } from '../../models/docente.model';
 import { SeveridadIncidentePipe } from '../../pipes/severidad.pipe';
 
 @Component({
@@ -30,13 +32,20 @@ export class IncidentesComponent implements OnInit, OnDestroy {
   severidades = Object.values(SeveridadIncidente);
   filtroSeveridad = '';
 
+  /** Usuario en sesión */
+  usuarioSesion: Docente | null = null;
+
+  /** True cuando el usuario en sesión tiene rol DOCENTE */
+  get esDocente(): boolean { return this.usuarioSesion?.rol === 'DOCENTE'; }
+
   private destroy$ = new Subject<void>();
 
   constructor(
-    private api: ApiService, 
+    private api: ApiService,
     private fb: FormBuilder,
     private catalogos: CatalogosService,
-    private toast: ToastService
+    private toast: ToastService,
+    private auth: AuthService
   ) {
     this.form = this.fb.group({
       turno: [null, Validators.required],
@@ -49,8 +58,15 @@ export class IncidentesComponent implements OnInit, OnDestroy {
     });
   }
 
+  // Carga sesión, datos y configura el auto-relleno de zona al seleccionar turno
   ngOnInit(): void {
+    this.usuarioSesion = this.auth.getUsuarioActual();
     this.cargar();
+    this.form.get('turno')?.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(turnoId => {
+      if (!turnoId) return;
+      const turno = this.turnos.find(t => t.id === +turnoId);
+      if (turno?.zona?.id) this.form.get('zona')?.setValue(turno.zona.id, { emitEvent: false });
+    });
   }
 
   ngOnDestroy(): void {
@@ -58,6 +74,7 @@ export class IncidentesComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
+  // Carga incidentes, turnos y zonas; si el usuario es Docente filtra a sus propios turnos
   cargar(): void {
     this.loading = true;
     forkJoin({
@@ -66,14 +83,16 @@ export class IncidentesComponent implements OnInit, OnDestroy {
       zonas: this.catalogos.getZonas()
     }).pipe(takeUntil(this.destroy$)).subscribe({
       next: (data) => {
-        this.incidentes = data.incidentes;
-        this.turnos = data.turnos;
+        this.incidentes = this.esDocente
+          ? data.incidentes.filter(i => i.turno?.docente?.id === this.usuarioSesion?.id)
+          : data.incidentes;
+        this.turnos = this.esDocente
+          ? data.turnos.filter(t => t.docente?.id === this.usuarioSesion?.id)
+          : data.turnos;
         this.zonas = data.zonas;
         this.loading = false;
       },
-      error: () => {
-        this.loading = false;
-      }
+      error: () => { this.loading = false; }
     });
   }
 
@@ -84,7 +103,14 @@ export class IncidentesComponent implements OnInit, OnDestroy {
 
   abrirCrear(): void {
     this.editId = null;
-    this.form.reset({ tipo: TipoIncidente.CONVIVENCIA, severidad: SeveridadIncidente.S1_LEVE });
+    const ahora = new Date();
+    const fechaHoraLocal = new Date(ahora.getTime() - ahora.getTimezoneOffset() * 60000)
+      .toISOString().slice(0, 16);
+    this.form.reset({
+      tipo: TipoIncidente.CONVIVENCIA,
+      severidad: SeveridadIncidente.S1_LEVE,
+      fechaHora: fechaHoraLocal
+    });
     this.showModal = true;
   }
 

@@ -4,12 +4,15 @@ import com.juan.vigidocente.model.*;
 import com.juan.vigidocente.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.LocalDateTime;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Component
+@Profile("!test")
 @RequiredArgsConstructor
 public class DataLoader implements CommandLineRunner {
 
@@ -22,7 +25,8 @@ public class DataLoader implements CommandLineRunner {
     private final PerfilDocenteRepository perfilDocenteRepository;
     private final HorarioRepository horarioRepository;
     private final FranjaHorarioRepository franjaHorarioRepository;
-
+    private final PasswordEncoder passwordEncoder;
+    
     @Override
     public void run(String... args) throws Exception {
 
@@ -34,37 +38,37 @@ public class DataLoader implements CommandLineRunner {
         System.out.println("📋 Cargando docentes...");
         Docente d1 = docenteRepository.save(Docente.builder()
                 .nombre("Carlos").apellido("García")
-                .email("carlos.garcia@colegio.edu.co").password("1234")
+                .email("carlos.garcia@colegio.edu.co").password(passwordEncoder.encode("1234"))
                 .telefono("3001234567").rol(RolDocente.DOCENTE).activo(true).build());
 
         Docente d2 = docenteRepository.save(Docente.builder()
                 .nombre("María").apellido("López")
-                .email("maria.lopez@colegio.edu.co").password("1234")
+                .email("maria.lopez@colegio.edu.co").password(passwordEncoder.encode("1234"))
                 .telefono("3009876543").rol(RolDocente.DOCENTE).activo(true).build());
 
         Docente d3 = docenteRepository.save(Docente.builder()
                 .nombre("Andrés").apellido("Martínez")
-                .email("andres.martinez@colegio.edu.co").password("1234")
+                .email("andres.martinez@colegio.edu.co").password(passwordEncoder.encode("1234"))
                 .telefono("3105551234").rol(RolDocente.COORDINADOR).activo(true).build());
 
         Docente d4 = docenteRepository.save(Docente.builder()
                 .nombre("Laura").apellido("Rodríguez")
-                .email("laura.rodriguez@colegio.edu.co").password("1234")
+                .email("laura.rodriguez@colegio.edu.co").password(passwordEncoder.encode("1234"))
                 .telefono("3207654321").rol(RolDocente.DOCENTE).activo(true).build());
 
         Docente d5 = docenteRepository.save(Docente.builder()
                 .nombre("Juan").apellido("Pérez")
-                .email("juan.perez@colegio.edu.co").password("1234")
+                .email("juan.perez@colegio.edu.co").password(passwordEncoder.encode("1234"))
                 .telefono("3154443322").rol(RolDocente.ADMINISTRADOR).activo(true).build());
 
         Docente d6 = docenteRepository.save(Docente.builder()
                 .nombre("Sofía").apellido("Torres")
-                .email("sofia.torres@colegio.edu.co").password("1234")
+                .email("sofia.torres@colegio.edu.co").password(passwordEncoder.encode("1234"))
                 .telefono("3112223344").rol(RolDocente.DOCENTE).activo(true).build());
 
         Docente d7 = docenteRepository.save(Docente.builder()
                 .nombre("Miguel").apellido("Herrera")
-                .email("miguel.herrera@colegio.edu.co").password("1234")
+                .email("miguel.herrera@colegio.edu.co").password(passwordEncoder.encode("1234"))
                 .telefono("3223334455").rol(RolDocente.DOCENTE).activo(true).build());
 
         System.out.println("✅ " + docenteRepository.count() + " docentes cargados");
@@ -331,14 +335,6 @@ public class DataLoader implements CommandLineRunner {
         System.out.println("✅ " + reasignacionRepository.count() + " reasignaciones cargadas");
 
         System.out.println("🎉 ¡Carga completa de datos finalizada exitosamente!");
-        }
-
-        // --- PASSWORD UPDATE (if empty) ---
-        for (Docente d : docenteRepository.findAll()) {
-            if (d.getPassword() == null || d.getPassword().isEmpty()) {
-                d.setPassword("1234");
-                docenteRepository.save(d);
-            }
         }
     }
 }

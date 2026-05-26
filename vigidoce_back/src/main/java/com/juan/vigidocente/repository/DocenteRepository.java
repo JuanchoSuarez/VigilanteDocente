@@ -14,7 +14,8 @@ public interface DocenteRepository extends JpaRepository<Docente, Long> {
     List<Docente> findByRol(RolDocente rol);
     List<Docente> findByActivo(Boolean activo);
     java.util.Optional<Docente> findByEmailAndPassword(String email, String password);
-
+    java.util.Optional<Docente> findByEmail(String email);
+    
     boolean existsByEmail(String email);
 
     // --- Queries JPQL con @Query (nuevos) ---
